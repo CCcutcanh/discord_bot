@@ -98,7 +98,7 @@ async def youtube_search(ctx):
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check = check)
-    search = YoutubeSearch('{message.content}', max_results=5).to_json()
+    search = YoutubeSearch('{message_content}'.format(massage_content = message.content), max_results=5).to_json()
     search_dict = json.loads(search)
     for v in search_dict['videos']:
         result = 'https://www.youtube.com/watch?v=' + v['id'] + " - " + v['title'] + " của kênh " + v['channel']
