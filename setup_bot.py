@@ -215,4 +215,4 @@ async def dovui(ctx):
         await ctx.send('câu trả lời chính xác, đáp án là {dap_an}'.format(dap_an = str(dap_an)))
     if(message.content != dap_an):
         await ctx.send('chưa chính xác rồiiiii:((, đáp án là {dap_an}'.format(dap_an = str(dap_an)))
-bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.Gpyr4V.Ij1Zsgl-HlWUF618BvGTz0P2qaPZohGC_Up4zY')
+bot.run('token')
