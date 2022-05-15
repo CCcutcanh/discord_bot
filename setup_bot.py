@@ -124,8 +124,8 @@ async def youtube_search(ctx):
         await ctx.send('đây là các kết quả tìm kiếm {result}'.format(result = result))
 @bot.command()
 @commands.is_owner()
-async def offbot(ctx):
-    if (ctx.author.id == 716146182849560598):
+async def offbot(ctx, m):
+    if (m.author.id == ctx.author.id == 716146182849560598):
         await ctx.send('đã tắt bot!')
         print("off bot")
         await ctx.bot.logout()
