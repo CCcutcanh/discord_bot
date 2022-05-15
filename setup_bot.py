@@ -1,11 +1,30 @@
 import discord
 from discord.ext import commands
 import json 
+import os
 import requests
 from youtube_search import YoutubeSearch
+from PIL import *
+import random
+import pickle
+import youtube_dl
+import os
+import random
+os.chdir("C:\\codde\\discord_bot")
+
 bot = commands.Bot(command_prefix='/')
+data_filename = "data.pickle"
+
+class Data:
+    def __init__(self, wallet, bank):
+        self.wallet = wallet
+        self.bank = bank
 #run bot
-#cllient
+#client
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send('bạn đã làm việc quá nhiều hãy nghỉ ngơi sau {:.2f} giây'.format(error.retry_after))
 @bot.event
 async def on_ready():
     print(f'[CLIENT] client completed')
@@ -98,7 +117,7 @@ async def youtube_search(ctx):
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check = check)
-    search = YoutubeSearch('{content}'.format(content = message.content), max_results=5).to_json()
+    search = YoutubeSearch('{content}'.format(content = str(message.content)), max_results=5).to_json()
     search_dict = json.loads(search)
     for v in search_dict['videos']:
         result = 'https://www.youtube.com/watch?v=' + v['id'] + " - " + v['title'] + " của kênh " + v['channel']
@@ -175,11 +194,75 @@ async def play_taixiu(ctx):
             result_taixiu_le = """nhà cái ra {chat} ({nha_cai}) bạn cược {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua))
             await ctx.send(result_taixiu_le)
             print(result_taixiu_le)
-        elif (message.content.lower() == "so"):
-            await ctx.send('nhập số bạn muốn đặt cược (nếu không hiểu có thể gõ lệnh hd để biết luật chơi)')
+        elif (message.content.lower() == "so 1"):
             base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
             api_key_so = '&apikey=KeyTest'
-            full_url_so = base_url_so + "value=" + message.content + api_key_so
+            full_url_so = base_url_so + "value=1" + api_key_so
+            get_so = requests.get(full_url_so)
+            data_so = get_so.text
+            parse_json_so = json.loads(data_so)
+            you = parse_json_so['người chơi']['total']
+            ketqua2 = parse_json_so['ketqua']['total']
+            ketqua_so = parse_json_so['mở bát']['bộ']
+            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
+            await ctx.send(result_taixiu_so)
+            print(result_taixiu_so)
+        elif (message.content.lower() == "so 2"):
+            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
+            api_key_so = '&apikey=KeyTest'
+            full_url_so = base_url_so + "value=2" + api_key_so
+            get_so = requests.get(full_url_so)
+            data_so = get_so.text
+            parse_json_so = json.loads(data_so)
+            you = parse_json_so['người chơi']['total']
+            ketqua2 = parse_json_so['ketqua']['total']
+            ketqua_so = parse_json_so['mở bát']['bộ']
+            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
+            await ctx.send(result_taixiu_so)
+            print(result_taixiu_so)
+        elif (message.content.lower() == "so 3"):
+            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
+            api_key_so = '&apikey=KeyTest'
+            full_url_so = base_url_so + "value=3" + api_key_so
+            get_so = requests.get(full_url_so)
+            data_so = get_so.text
+            parse_json_so = json.loads(data_so)
+            you = parse_json_so['người chơi']['total']
+            ketqua2 = parse_json_so['ketqua']['total']
+            ketqua_so = parse_json_so['mở bát']['bộ']
+            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
+            await ctx.send(result_taixiu_so)
+            print(result_taixiu_so)
+        elif (message.content.lower() == "so 4"):
+            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
+            api_key_so = '&apikey=KeyTest'
+            full_url_so = base_url_so + "value=4" + api_key_so
+            get_so = requests.get(full_url_so)
+            data_so = get_so.text
+            parse_json_so = json.loads(data_so)
+            you = parse_json_so['người chơi']['total']
+            ketqua2 = parse_json_so['ketqua']['total']
+            ketqua_so = parse_json_so['mở bát']['bộ']
+            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
+            await ctx.send(result_taixiu_so)
+            print(result_taixiu_so)
+        elif (message.content.lower() == "so 5"):
+            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
+            api_key_so = '&apikey=KeyTest'
+            full_url_so = base_url_so + "value=5" + api_key_so
+            get_so = requests.get(full_url_so)
+            data_so = get_so.text
+            parse_json_so = json.loads(data_so)
+            you = parse_json_so['người chơi']['total']
+            ketqua2 = parse_json_so['ketqua']['total']
+            ketqua_so = parse_json_so['mở bát']['bộ']
+            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
+            await ctx.send(result_taixiu_so)
+            print(result_taixiu_so)
+        elif (message.content.lower() == "so 6"):
+            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
+            api_key_so = '&apikey=KeyTest'
+            full_url_so = base_url_so + "value=6" + api_key_so
             get_so = requests.get(full_url_so)
             data_so = get_so.text
             parse_json_so = json.loads(data_so)
@@ -215,4 +298,58 @@ async def dovui(ctx):
         await ctx.send('câu trả lời chính xác, đáp án là {dap_an}'.format(dap_an = str(dap_an)))
     if(message.content != dap_an):
         await ctx.send('chưa chính xác rồiiiii:((, đáp án là {dap_an}'.format(dap_an = str(dap_an)))
-bot.run('token')
+@bot.command()
+@commands.cooldown(1, 2400, commands.BucketType.user)
+async def work(message):
+    member_data = load_member_data(message.author.id)
+    earning = random.randrange(350) 
+    member_data.bank += earning
+    await message.channel.send(f"bạn đã nhận được {earning} tiền!")
+
+    save_member_data(message.author.id, member_data)
+
+@bot.command()
+async def balance(message):
+    member_data = load_member_data(message.author.id)
+
+    embed = discord.Embed(title=f"số tiền của {message.author.display_name}")
+    embed.add_field(name="tiền mặt", value=str(member_data.wallet))
+    embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
+
+    await message.channel.send(embed=embed)
+@bot.command()
+async def shop(ctx):
+    await ctx.send('đây là các món đồ bạn có thể mua ở shop:\n1.máy tính: 150 tiền')
+    def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel and \
+            m.content.lower() in ["1"]
+    message = await bot.wait_for('message', check = check)
+    if(message.content.lower() == "1"):
+        member_data = load_member_data(message.author.id)
+        member_data.bank -= 150
+
+        save_member_data(message.author.id, member_data)
+#Functions
+def load_data():
+    if os.path.isfile(data_filename):
+        with open(data_filename, "rb") as file:
+            return pickle.load(file)
+    else:
+        return dict()
+
+def load_member_data(member_ID):
+    data = load_data()
+
+    if member_ID not in data:
+        return Data(0, 0)
+
+    return data[member_ID]
+
+def save_member_data(member_ID, member_data):
+    data = load_data()
+
+    data[member_ID] = member_data
+
+    with open(data_filename, "wb") as file:
+        pickle.dump(data, file)
+bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.G8mWtr.LzSBNXy6pOnCwq3jkfVuYrb2qraTxeaYZzE_m4')
