@@ -10,7 +10,6 @@ import pickle
 import youtube_dl
 import os
 import random
-os.chdir("C:\\codde\\discord_bot")
 
 bot = commands.Bot(command_prefix='/')
 data_filename = "data.pickle"
@@ -147,7 +146,7 @@ async def play_taixiu(ctx):
         data_taixiu = get_taixiu.text
         parse_json = json.loads(data_taixiu)
         if (message.content.lower() == "hd"):
-            await ctx.send('luật chơi tài xỉu như sau: \n có 3 cách chơi \n cách 1: cược tài/xỉu. Nếu cược xỉu Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 4 đến 10. Nếu cược tài Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 11 đến 17. \n cách 2: cược chẵn/lẻ. Nếu cược chẵn sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 4,6,8,10,12,14,16. Nếu cược lẻ sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 5,7,9,11,13,15,17. \n cách 3: cược số. Thắng cược khi kết quả của 1 trong 3 xúc xắc hiển thị đúng con số mà người chơi đã chọn. cách 1 có 1 trường hợp đặc biệt đó là bộ ba bất kì nhưng do mình sẽ không làm kiểu chơi này vậy nên chúng ta vẫn sẽ chơi như thường\nnếu muốn out game hãy gõ quit')
+            await ctx.send('luật chơi tài xỉu như sau: \n có 3 cách chơi \n cách 1: cược tài/xỉu. Nếu cược xỉu Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 4 đến 10. Nếu cược tài Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 11 đến 17. \n cách 2: cược chẵn/lẻ. Nếu cược chẵn sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 4,6,8,10,12,14,16. Nếu cược lẻ sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 5,7,9,11,13,15,17. \nnếu muốn out game hãy gõ quit')
         if (message.content.lower() == "tai"):
             bat1 = parse_json['mở bát']['one']
             bat2 = parse_json['mở bát']['two']
@@ -194,84 +193,6 @@ async def play_taixiu(ctx):
             result_taixiu_le = """nhà cái ra {chat} ({nha_cai}) bạn cược {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua))
             await ctx.send(result_taixiu_le)
             print(result_taixiu_le)
-        elif (message.content.lower() == "so 1"):
-            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
-            api_key_so = '&apikey=KeyTest'
-            full_url_so = base_url_so + "value=1" + api_key_so
-            get_so = requests.get(full_url_so)
-            data_so = get_so.text
-            parse_json_so = json.loads(data_so)
-            you = parse_json_so['người chơi']['total']
-            ketqua2 = parse_json_so['ketqua']['total']
-            ketqua_so = parse_json_so['mở bát']['bộ']
-            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
-            await ctx.send(result_taixiu_so)
-            print(result_taixiu_so)
-        elif (message.content.lower() == "so 2"):
-            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
-            api_key_so = '&apikey=KeyTest'
-            full_url_so = base_url_so + "value=2" + api_key_so
-            get_so = requests.get(full_url_so)
-            data_so = get_so.text
-            parse_json_so = json.loads(data_so)
-            you = parse_json_so['người chơi']['total']
-            ketqua2 = parse_json_so['ketqua']['total']
-            ketqua_so = parse_json_so['mở bát']['bộ']
-            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
-            await ctx.send(result_taixiu_so)
-            print(result_taixiu_so)
-        elif (message.content.lower() == "so 3"):
-            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
-            api_key_so = '&apikey=KeyTest'
-            full_url_so = base_url_so + "value=3" + api_key_so
-            get_so = requests.get(full_url_so)
-            data_so = get_so.text
-            parse_json_so = json.loads(data_so)
-            you = parse_json_so['người chơi']['total']
-            ketqua2 = parse_json_so['ketqua']['total']
-            ketqua_so = parse_json_so['mở bát']['bộ']
-            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
-            await ctx.send(result_taixiu_so)
-            print(result_taixiu_so)
-        elif (message.content.lower() == "so 4"):
-            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
-            api_key_so = '&apikey=KeyTest'
-            full_url_so = base_url_so + "value=4" + api_key_so
-            get_so = requests.get(full_url_so)
-            data_so = get_so.text
-            parse_json_so = json.loads(data_so)
-            you = parse_json_so['người chơi']['total']
-            ketqua2 = parse_json_so['ketqua']['total']
-            ketqua_so = parse_json_so['mở bát']['bộ']
-            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
-            await ctx.send(result_taixiu_so)
-            print(result_taixiu_so)
-        elif (message.content.lower() == "so 5"):
-            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
-            api_key_so = '&apikey=KeyTest'
-            full_url_so = base_url_so + "value=5" + api_key_so
-            get_so = requests.get(full_url_so)
-            data_so = get_so.text
-            parse_json_so = json.loads(data_so)
-            you = parse_json_so['người chơi']['total']
-            ketqua2 = parse_json_so['ketqua']['total']
-            ketqua_so = parse_json_so['mở bát']['bộ']
-            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
-            await ctx.send(result_taixiu_so)
-            print(result_taixiu_so)
-        elif (message.content.lower() == "so 6"):
-            base_url_so = 'https://manhict.tech/game/v2/taixiu?method=so&'
-            api_key_so = '&apikey=KeyTest'
-            full_url_so = base_url_so + "value=6" + api_key_so
-            get_so = requests.get(full_url_so)
-            data_so = get_so.text
-            parse_json_so = json.loads(data_so)
-            you = parse_json_so['người chơi']['total']
-            ketqua2 = parse_json_so['ketqua']['total']
-            ketqua_so = parse_json_so['mở bát']['bộ']
-            result_taixiu_so = """bạn chọn {you}, kết quả là {ketqua_so}. bạn {ketqua2}""".format(ketqua2 = str(ketqua2), ketqua_so = str(ketqua_so), you = str(you))
-            await ctx.send(result_taixiu_so)
-            print(result_taixiu_so)
         elif (message.content.lower() == "quit"):
             await ctx.send("-----------------------------end game-----------------------------")
             break
@@ -321,14 +242,20 @@ async def balance(message):
 async def shop(ctx):
     await ctx.send('đây là các món đồ bạn có thể mua ở shop:\n1.máy tính: 150 tiền')
     def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and \
-            m.content.lower() in ["1"]
+            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1"]
     message = await bot.wait_for('message', check = check)
     if(message.content.lower() == "1"):
         member_data = load_member_data(message.author.id)
-        member_data.bank -= 150
-
-        save_member_data(message.author.id, member_data)
+        if(member_data.wallet >= 150):
+            member_data.wallet -= 150
+            await ctx.send('giao dịch thành công')
+            save_member_data(message.author.id, member_data)
+        else:
+            await ctx.send('bạn quá nghèo để mua được máy tính')
+            save_member_data(message.author.id, member_data)
+@bot.command()
+async def bank():
+    await ctx.send('chọn điều bạn muôn làm ở ngân hàng \n')
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -352,4 +279,4 @@ def save_member_data(member_ID, member_data):
 
     with open(data_filename, "wb") as file:
         pickle.dump(data, file)
-bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.G8mWtr.LzSBNXy6pOnCwq3jkfVuYrb2qraTxeaYZzE_m4')
+bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.G412Gy.ci2CZt6invRz5wpxjQqjItVLlyEvuzz7o-4Uo0')
