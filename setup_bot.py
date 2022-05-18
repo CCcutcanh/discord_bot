@@ -73,16 +73,15 @@ async def help(ctx):
     em.add_field(name = "cách dùng", value = "/help")
     await ctx.send(embed = em)
 class Data:
-    def __init__(self, wallet, bank, pc):
+    def __init__(self, wallet, pc):
         self.wallet = wallet
-        self.bank = bank
         self.pc = pc
 #run bot
 #client
 @bot.event
-async def on_command_error(ctx, error):
+async def on_command_error():
     if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send('bạn đã làm việc quá nhiều hãy nghỉ ngơi sau {:.2f} giây'.format(error.retry_after))
+            await ctx.send('lệnh này đang trong thời gian hồi hãy wuay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.event
 async def on_ready():
     print(f'[CLIENT] client completed')
@@ -299,9 +298,7 @@ async def work(ctx):
 async def balance(message):
     member_data = load_member_data(message.author.id)
 
-    embed = discord.Embed(title=f"số tiền của {message.author.display_name}")
-    embed.add_field(name="tiền mặt", value=str(member_data.wallet))
-    embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
+    embed = discord.Embed(title=f"số tiền của {message.author.display_name}", description = str(member_data.wallet))
 
     await message.channel.send(embed=embed)
 @bot.command()
@@ -313,7 +310,7 @@ async def shop_sell(ctx):
     if(message.content.lower() == "1"):
         member_data = load_member_data(message.author.id)
         if member_data.pc == 1:
-            member_data.bank += 80
+            member_data.wallet += 80
             member_data.pc = 0
             await ctx.send('giao dịch thành công')
             save_member_data(message.author.id, member_data)
@@ -333,8 +330,8 @@ async def shop_buy(ctx):
         if member_data.pc == 1:
             await ctx.send('bạn đã có pc rồi, mua làm gì nữa')
         else:
-            if member_data.bank >= 150:
-                member_data.bank -= 150
+            if member_data.wallet >= 150:
+                member_data.wallet -= 150
                 member_data.pc = 1
                 await ctx.send('giao dịch thành công')
                 save_member_data(message.author.id, member_data)
@@ -343,22 +340,14 @@ async def shop_buy(ctx):
     else:
         await ctx.send('sai cú pháp, món đồ bạn cần mua không tồn tại')
 @bot.command()
-@commands.cooldown(3, 1800, commands.BucketType.user)
-async def bank(ctx):
+async def chuyentien(ctx,member:discord.Member):
+    await ctx.send('bạn muốn chuyển bao nhiêu tiền')
     def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1", "2", "3"]
+        return m.author.id == ctx.author.id
+
     message = await bot.wait_for('message', check = check)
-    await ctx.send('chọn điều bạn muôn làm ở ngân hàng \n1. rút tiền(300$/lần)\n2. gửi tiền(300$/lần)')
-    if(message.content.lower() == "1"):
-        member_data = load_member_data(message.author.id)
-        member_data.bank -= 300
-        member_data.wallet += 300
-        save_member_data(message.author.id, member_data)
-    if(message.content.lower() == "2"):
-        member_data = load_member_data(message.author.id)
-        member_data.bank += 300
-        member_data.wallet -= 300
-#Functions
+    user_data = load_member_data(message.author.id)
+    member_data = load_member_data(member)
 def load_data():
     if os.path.isfile(data_filename):
         with open(data_filename, "rb") as file:
@@ -370,7 +359,7 @@ def load_member_data(member_ID):
     data = load_data()
 
     if member_ID not in data:
-        return Data(0, 0, 0)
+        return Data(0, 0)
 
     return data[member_ID]
 
@@ -381,4 +370,4 @@ def save_member_data(member_ID, member_data):
 
     with open(data_filename, "wb") as file:
         pickle.dump(data, file)
-bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.GGWvn9.jFez5hT5rC4rQVlD7BbfRm8b-aGw0QRiXM7ipU')
+bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.GoiFdX.QMrA4b2o-9DjlGuo8VNatFlccAv6IZMfI386x4')
