@@ -18,7 +18,7 @@ async def help(ctx):
     em = discord.Embed(title = "help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot và /help <lệnh> để biết cách sử dụng lệnh (một số default command bot lỗi ko help đc nhưng chắc chả cần help đâu:>)")
     em.add_field(name = "info command", value = "xsmb, covid19, weather, youtube_search")
     em.add_field(name = "game command", value = "dovui, play_taixiu")
-    em.add_field(name = "role play command", value = "balance, bank, shop(shop_buy, shop_sell), work")
+    em.add_field(name = "role play command", value = "balance, bank(withdraw, deposit), shop(shop_buy, shop_sell), work")
     em.add_field(name = "default command bot", value = "help, offbot, ping")
 
     await ctx.send(embed = em)
@@ -39,7 +39,7 @@ async def weather(ctx):
     await ctx.send(embed = em)
 @help.command()
 async def youtube_search(ctx):
-    em = discord.Embed(title = "youtube_search", description = "tìm kiesm video trên youtube qua từ khóa", color = ctx.author.color)
+    em = discord.Embed(title = "youtube_search", description = "tìm kiếm video trên youtube qua từ khóa", color = ctx.author.color)
     em.add_field(name = "cách dùng", value = "/youtube_search *sau khi bot nhắn tin* nhập từ khóa cần tìm kiếm và gửi")
     await ctx.send(embed = em)
 @help.command()
@@ -58,30 +58,44 @@ async def balance(ctx):
     em.add_field(name = "cách dùng", value = "/balance")
     await ctx.send(embed = em)
 @help.command()
-async def shop(ctx):
-    em = discord.Embed(title = "shop", description = "shop mua, bán các món đồ của bạn và đồ bạn cần", color = ctx.author.color)
+async def shop_buy(ctx):
+    em = discord.Embed(title = "shop_buy/shop_sell", description = "shop mua, bán các món đồ của bạn và đồ bạn cần", color = ctx.author.color)
     em.add_field(name = "cách dùng", value = "/shop_buy *sau khi bot gửi tin nhắn* nhập và gửi số thứ tự của món đồ bạn cần mua, /shop_sell nhập số thứ tự thứ bạn cần bán")
     await ctx.send(embed = em)
+@help.command()
+async def shop_sell(ctx):
+    em = discord.Embed(title = "shop_buy/shop_sell", description = "shop mua, bán các món đồ của bạn và đồ bạn cần", color = ctx.author.color)
+    em.add_field(name = "cách dùng", value = "/shop_buy *sau khi bot gửi tin nhắn* nhập và gửi số thứ tự của món đồ bạn cần mua, /shop_sell nhập số thứ tự thứ bạn cần bán")
+    await ctx.send(embed = em)    
 @help.command()
 async def work(ctx):
     em = discord.Embed(title = "work", description = "có làm thì mới có ăn", color = ctx.author.color)
     em.add_field(name = "cách dùng", value = "/work *sau khi bot gửi tin có thể check lại tiền bằng lệnh balance*")
     await ctx.send(embed = em)
 @help.command()
+async def withdraw(ctx):
+    em = discord.Embed(title = "withdraw", description ="rút tiền bạn có trong ngân hàng")
+    em.add_field(name = "cách dùng", value = "/withdraw (sau khi bot gửi tin) nhập withdraw <số tiền muốn rút> chỉ nhập số ở sau chữ withdraw nhập chữ lỗi ráng chịu:)", color = ctx.author.color)
+@help.command()
+async def deposit(ctx):
+    em = discord.Embed(title = "deposit", description = "gửi một số tiền tiết kiệm bạn muốn vào ngân hàng", color = ctx.author.color)
+    em.add_field(name = "cách dùng", value = "/deposit (sau khi bot gửi tin) nhập deposit <số tiền muốn gửi> chỉ nhập số sau chữ deposit nhập chữ lỗi ráng chịu:))")
+@help.command()
 async def help(ctx):
     em = discord.Embed(title = "help", description = "cho bạn biết thông tin về các lệnh có tren bot", color = ctx.author.color)
     em.add_field(name = "cách dùng", value = "/help")
     await ctx.send(embed = em)
 class Data:
-    def __init__(self, wallet, pc):
+    def __init__(self, wallet, bank, pc):
         self.wallet = wallet
+        self.bank = bank
         self.pc = pc
 #run bot
 #client
 @bot.event
 async def on_command_error():
     if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send('lệnh này đang trong thời gian hồi hãy wuay lại sau {:.2f} giây'.format(error.retry_after))
+            await ctx.send('lệnh này đang trong thời gian hồi hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.event
 async def on_ready():
     print(f'[CLIENT] client completed')
@@ -117,57 +131,22 @@ async def weather(ctx):
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check=check)
-    api_key = "f5e58e5107262dd200ef30cc9e47355a"
 
                     # base_url variable to store url
-    base_url = "http://api.openweathermap.org/data/2.5/weather?"
-
+    base_url = "https://manhict.tech/weather/vietnam?area="
                         # complete_url variable to store
                         # complete url address
-    complete_url = base_url + "appid=" + api_key + "&q=" + str(message.content) + "&lang=vi"
-
-                        # get method of requests module
-                        # return response object
+    complete_url = base_url + str(message.content) + "&type=text"
+    url_image = complete_url + ".png" 
+    response_image = requests.get(url_image)
+    file = open("data.png", "wb")
+    file.write(response_image.content)
+    file.close()
     response = requests.get(complete_url)
-
-                        # json method of response object
-                        # convert json format data into
-                        # python format data
-    x = response.json()
-
-                        # Now x contains list of nested dictionaries
-                        # Check the value of "cod" key is equal to
-                        # "404", means city is found otherwise,
-                        # city is not found
-    if x["cod"] != "404":
-
-                            # store the value of "main"
-                            # key in variable y
-        y = x["main"]
-
-                            # store the value corresponding
-                            # to the "temp" key of y
-        current_temperature = y["temp"]
-        unit = current_temperature - 273.15 
-                            # store the value corresponding
-                            # to the "pressure" key of y
-        current_pressure = y["pressure"]
-
-                            # store the value corresponding
-                            # to the "humidity" key of y
-        current_humidity = y["humidity"]
-
-                            # store the value of "weather"
-                            # key in variable z
-        z = x["weather"]
-
-                            # store the value corresponding
-                            # to the "description" key at
-                            # the 0th index of z
-        weather_description = z[0]["description"]
-                            # print following values
-        result_weather = """thời tiết hiện thời của {city_name} \ncó nhiệt độ = {unit} \náp suất không khí = {current_pressure} \nđộ ẩm = {current_humidity} \n{weather_description}""".format(city_name = str(message.content), unit = unit, current_pressure = current_pressure, current_humidity = current_humidity, weather_description = weather_description) 
-        await ctx.send(result_weather)
+    data_weather = response.text
+    json_weather = json.loads(data_weather)
+    result_weather = json_weather['data']
+    await ctx.send(result_weather, file = discord.File('data.png'))
 @bot.command()
 async def youtube_search(ctx):
     await ctx.send('nhập từ khóa cần tìm kiếm')
@@ -195,7 +174,7 @@ async def play_taixiu(ctx):
     while True:
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and \
-            m.content.lower() in ["hd", "start", "quit", "tai", "xiu", "chan", "le", "so"]
+            m.content.lower() in ["hd", "start", "quit", "tai", "xiu", "chan", "le"]
         message = await bot.wait_for('message', check = check)
         base_url_taixiu = 'https://manhict.tech/game/v2/taixiu?method='
         api_key_taixiu = '&apikey=KeyTest'
@@ -278,9 +257,9 @@ async def dovui(ctx):
     if(message.content != dap_an):
         await ctx.send('chưa chính xác rồiiiii:((, đáp án là {dap_an}'.format(dap_an = str(dap_an)))
 @bot.command()
-@commands.cooldown(1, 2400, commands.BucketType.user)
+@commands.cooldown(1, 3600, commands.BucketType.user)
 async def work(ctx):
-    await ctx.send('đây là các cộng việc bạn có thể làm\n1. lấp trình viên')
+    await ctx.send('đây là các cộng việc bạn có thể làm\n1. lấp trình viên: yêu cầu: máy tính')
     def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1"]
     message = await bot.wait_for('message', check = check)
@@ -293,12 +272,13 @@ async def work(ctx):
             save_member_data(message.author.id, member_data)
         else:
             await ctx.send('bạn chưa có máy tính để làm lập trình viên')
-
 @bot.command()
 async def balance(message):
     member_data = load_member_data(message.author.id)
 
-    embed = discord.Embed(title=f"số tiền của {message.author.display_name}", description = str(member_data.wallet))
+    embed = discord.Embed(title=f"số tiền của {message.author.display_name}")
+    embed.add_field(name="tiền mặt", value=str(member_data.wallet))
+    embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
 
     await message.channel.send(embed=embed)
 @bot.command()
@@ -310,7 +290,7 @@ async def shop_sell(ctx):
     if(message.content.lower() == "1"):
         member_data = load_member_data(message.author.id)
         if member_data.pc == 1:
-            member_data.wallet += 80
+            member_data.bank += 80
             member_data.pc = 0
             await ctx.send('giao dịch thành công')
             save_member_data(message.author.id, member_data)
@@ -321,7 +301,7 @@ async def shop_sell(ctx):
         save_member_data(message.author.id, member_data)
 @bot.command()
 async def shop_buy(ctx):
-    await ctx.send('đồ có thể mua\n1. pc: 150 tiền')
+    await ctx.send('đồ có thể mua\n1. pc: 1500 tiền')
     def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1"]
     message = await bot.wait_for('message', check = check)
@@ -330,8 +310,8 @@ async def shop_buy(ctx):
         if member_data.pc == 1:
             await ctx.send('bạn đã có pc rồi, mua làm gì nữa')
         else:
-            if member_data.wallet >= 150:
-                member_data.wallet -= 150
+            if member_data.bank >= 1500:
+                member_data.bank -= 1500
                 member_data.pc = 1
                 await ctx.send('giao dịch thành công')
                 save_member_data(message.author.id, member_data)
@@ -340,14 +320,40 @@ async def shop_buy(ctx):
     else:
         await ctx.send('sai cú pháp, món đồ bạn cần mua không tồn tại')
 @bot.command()
-async def chuyentien(ctx,member:discord.Member):
-    await ctx.send('bạn muốn chuyển bao nhiêu tiền')
+@commands.cooldown(3, 2400, commands.BucketType.user)
+async def withdraw(ctx):
+    await ctx.send('nhập số tiền bạn cần rút')
     def check(m):
         return m.author.id == ctx.author.id
-
-    message = await bot.wait_for('message', check = check)
-    user_data = load_member_data(message.author.id)
-    member_data = load_member_data(member)
+    message = await bot.wait_for('message', check=check)
+    if "withdraw" in message.content.lower():
+        split = message.content.lower().split(" ")
+        value = int(split[1])
+        member_data = load_member_data(message.author.id)
+        member_data.bank -= value
+        member_data.wallet += value
+        await ctx.send(f'đã rút thành công {value}$ vào ví')
+        save_member_data(message.author.id, member_data)
+    else:
+        await ctx.send('sai cú pháp')
+@bot.command()
+@commands.cooldown(3, 2400, commands.BucketType.user)
+async def deposit(ctx):
+    await ctx.send('nhập số tiền bạn muốn gửi tiết kiệm vào ngân hàng')
+    def check(m):
+        return m.author.id == ctx.author.id
+    message = await bot.wait_for('message', check=check)
+    if "deposit" in message.content.lower():
+        split = message.content.lower().split(" ")
+        value = int(split[1])
+        member_data = load_member_data(message.author.id)
+        member_data.bank += value
+        member_data.wallet -= value
+        await ctx.send(f'đã gửi thành công {value}$ vào ngân hàng')
+        save_member_data(message.author.id, member_data)
+    else:
+        await ctx.send('sai cú pháp')
+#Functions
 def load_data():
     if os.path.isfile(data_filename):
         with open(data_filename, "rb") as file:
@@ -359,7 +365,7 @@ def load_member_data(member_ID):
     data = load_data()
 
     if member_ID not in data:
-        return Data(0, 0)
+        return Data(0, 0, 0)
 
     return data[member_ID]
 
