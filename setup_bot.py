@@ -35,7 +35,7 @@ async def covid19(ctx):
 @help.command()
 async def weather(ctx):
     em = discord.Embed(title = "weather", description = "xem thông tin về thời tiết tại một thành phố", color = ctx.author.color)
-    em.add_field(name = "weather", value = "/weather *sau khi bot nhắn tin* nhập tên thành phố trong tiếng Anh và gửi")
+    em.add_field(name = "weather", value = "/weather *sau khi bot nhắn tin* nhập tên thành phố và gửi")
     await ctx.send(embed = em)
 @help.command()
 async def youtube_search(ctx):
@@ -137,15 +137,17 @@ async def weather(ctx):
                         # complete_url variable to store
                         # complete url address
     complete_url = base_url + str(message.content) + "&type=text"
+    #get text
+    response = requests.get(complete_url)
+    data_weather = response.text
+    json_weather = json.loads(data_weather)
+    result_weather = json_weather['data']
+    #get image
     url_image = complete_url + ".png" 
     response_image = requests.get(url_image)
     file = open("data.png", "wb")
     file.write(response_image.content)
     file.close()
-    response = requests.get(complete_url)
-    data_weather = response.text
-    json_weather = json.loads(data_weather)
-    result_weather = json_weather['data']
     await ctx.send(result_weather, file = discord.File('data.png'))
 @bot.command()
 async def youtube_search(ctx):
@@ -165,6 +167,8 @@ async def offbot(ctx, m):
         await ctx.send('đã tắt bot!')
         print("off bot")
         await ctx.bot.logout()
+    else:
+        await ctx.send('bạn không phải admin bot nên không đủ quyền hạn sử dụng lệnh này')
 @bot.command()
 async def ping(ctx):
     await ctx.send('pong!')
@@ -174,7 +178,7 @@ async def play_taixiu(ctx):
     while True:
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and \
-            m.content.lower() in ["hd", "start", "quit", "tai", "xiu", "chan", "le"]
+            m.content.lower() in ["hd", "quit", "tai", "xiu", "chan", "le"]
         message = await bot.wait_for('message', check = check)
         base_url_taixiu = 'https://manhict.tech/game/v2/taixiu?method='
         api_key_taixiu = '&apikey=KeyTest'
@@ -183,7 +187,7 @@ async def play_taixiu(ctx):
         data_taixiu = get_taixiu.text
         parse_json = json.loads(data_taixiu)
         if (message.content.lower() == "hd"):
-            await ctx.send('luật chơi tài xỉu như sau: \n có 3 cách chơi \n cách 1: cược tài/xỉu. Nếu cược xỉu Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 4 đến 10. Nếu cược tài Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 11 đến 17. \n cách 2: cược chẵn/lẻ. Nếu cược chẵn sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 4,6,8,10,12,14,16. Nếu cược lẻ sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 5,7,9,11,13,15,17. \nnếu muốn out game hãy gõ quit')
+            await ctx.send('luật chơi tài xỉu như sau: \n có 3 cách chơi \n cách 1: cược tài/xỉu. Nếu cược xỉu Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 4 đến 10. Nếu cược tài Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 11 đến 17. \n cách 2: cược chẵn/lẻ. Nếu cược chẵn sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 4,6,8,10,12,14,16. Nếu cược lẻ sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 5,7,9,11,13,15,17. \nLưu ý: nếu muốn out game hãy gõ quit, tiền cược mặc định của game là 200$/lần (ko thể thay đổi tại t lười code phần đấy vl:>)')
         if (message.content.lower() == "tai"):
             bat1 = parse_json['mở bát']['one']
             bat2 = parse_json['mở bát']['two']
@@ -194,8 +198,17 @@ async def play_taixiu(ctx):
             chat = parse_json['người chơi']['chất']
             ketqua = parse_json['ketqua']['total']
             result_taixiu_tai = """nhà cái ra {nha_cai_ra} ({nha_cai}), bạn chọn {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua), nha_cai_ra = str(nha_cai_ra))
-            await ctx.send(result_taixiu_tai)
-            print(result_taixiu_tai)
+            member_data = load_member_data(message.author.id)
+            if ("lose" in result_taixiu_tai):
+                    await ctx.send(result_taixiu_tai.replace("lose", "đã thua 200$"))
+                    member_data.wallet -= 200
+                    save_member_data(message.author.id, member_data)
+                    print(result_taixiu_tai)
+            elif ("win" in result_taixiu_tai):
+                await ctx.send(result_taixiu_tai.replace("win", "đã thắng 200$"))
+                member_data.wallet += 200
+                save_member_data(message.author.id, member_data)
+                print(result_taixiu_tai)
         elif (message.content.lower() == "xiu"):
             bat1 = parse_json['mở bát']['one']
             bat2 = parse_json['mở bát']['two']
@@ -206,8 +219,16 @@ async def play_taixiu(ctx):
             chat = parse_json['người chơi']['chất']
             ketqua = parse_json['ketqua']['total']
             result_taixiu_xiu = """nhà cái ra {nha_cai_ra} ({nha_cai}), bạn chọn {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua), nha_cai_ra = str(nha_cai_ra))
-            await ctx.send(result_taixiu_xiu)
-            print(result_taixiu_xiu)
+            if ("lose" in result_taixiu_xiu):
+                    await ctx.send(result_taixiu_xiu.replace("lose", "đã thua 200$"))
+                    member_data.wallet -= 200
+                    save_member_data(message.author.id, member_data)
+                    print(result_taixiu_xiu)
+            elif ("win" in result_taixiu_xiu):
+                await ctx.send(result_taixiu_xiu.replace("win", "đã thắng 200$"))
+                member_data.wallet += 200
+                save_member_data(message.author.id, member_data)
+                print(result_taixiu_xiu)
         elif (message.content.lower() == "chan"):
             bat1 = parse_json['mở bát']['one']
             bat2 = parse_json['mở bát']['two']
@@ -217,8 +238,16 @@ async def play_taixiu(ctx):
             chat = parse_json['mở bát']['total']
             ketqua = parse_json['ketqua']['total']
             result_taixiu_chan = """nhà cái ra {chat} ({nha_cai}) bạn cược {tong} . Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua))
-            await ctx.send(result_taixiu_chan)
-            print(result_taixiu_chan)
+            if ("lose" in result_taixiu_chan):
+                    await ctx.send(result_taixiu_chan.replace("lose", "đã thua 200$"))
+                    member_data.wallet -= 200
+                    save_member_data(message.author.id, member_data)
+                    print(result_taixiu_chan)
+            elif ("win" in result_taixiu_chan):
+                await ctx.send(result_taixiu_chan.replace("win", "đã thắng 200$"))
+                member_data.wallet += 200
+                save_member_data(message.author.id, member_data)
+                print(result_taixiu_chan)
         elif (message.content.lower() == "le"):
             bat1 = parse_json['mở bát']['one']
             bat2 = parse_json['mở bát']['two']
@@ -228,8 +257,16 @@ async def play_taixiu(ctx):
             chat = parse_json['mở bát']['total']
             ketqua = parse_json['ketqua']['total']
             result_taixiu_le = """nhà cái ra {chat} ({nha_cai}) bạn cược {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua))
-            await ctx.send(result_taixiu_le)
-            print(result_taixiu_le)
+            if ("lose" in result_taixiu_le):
+                    await ctx.send(result_taixiu_le.replace("lose", "đã thua 200$"))
+                    member_data.wallet -= 200
+                    save_member_data(message.author.id, member_data)
+                    print(result_taixiu_le)
+            elif ("win" in result_taixiu_le):
+                await ctx.send(result_taixiu_le.replace("win", "đã thắng 200$"))
+                member_data.wallet += 200
+                save_member_data(message.author.id, member_data)
+                print(result_taixiu_le)
         elif (message.content.lower() == "quit"):
             await ctx.send("-----------------------------end game-----------------------------")
             break
