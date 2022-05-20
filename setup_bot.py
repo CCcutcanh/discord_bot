@@ -355,7 +355,7 @@ async def keobuabao(ctx):
     while True:
         #get user input
         def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["kéo", "búa", "bao"]
+            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["kéo", "búa", "bao", "quit"]
         message = await bot.wait_for('message', check = check)
         #lấy api 
         url_keobuabao = 'https://manhict.tech/game/kbb?choose='
@@ -378,8 +378,9 @@ async def keobuabao(ctx):
             member_data = load_member_data(message.author.id)
             await ctx.send(result_keobuabao)
             save_member_data(message.author.id, member_data)
-        else:
+        elif (message.content.lower() == "quit"):
             await ctx.send('end game!')
+            break
 @bot.command()
 async def vuatiengviet(ctx):
     url_vuatiengviet = 'https://manhict.tech/vuatiengviet/image?word='
@@ -470,4 +471,4 @@ def save_member_data(member_ID, member_data):
 
     with open(data_filename, "wb") as file:
         pickle.dump(data, file)
-bot.run('token')
+bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.GBUlFa.aF89QPCNs3g6cgHT-5dtDxXHXEP-AMODGB1R78')
