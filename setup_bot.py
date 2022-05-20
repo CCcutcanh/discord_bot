@@ -439,7 +439,7 @@ async def dhbc(ctx):
     file = open("DHBC.png", "wb")
     file.write(get_image_DHBC.content)
     file.close()
-    await ctx.send(f'đây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ\nlưu ý: bặt caplock lên trước khi gửi đáp án:))', file = discord.File('DHBC.png'))
+    await ctx.send(f'đây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
     if "m" in url_DHBC:
         def check(m):
             return m.author.id == ctx.author.id
