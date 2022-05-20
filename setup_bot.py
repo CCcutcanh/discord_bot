@@ -238,19 +238,19 @@ async def work(ctx):
     def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1", "2", "3"]
     message = await bot.wait_for('message', check = check)
-    if(message.content.lower() == "1"):
+    if message.content.lower() == "1":
         member_data = load_member_data(message.author.id)
         earning = random.randrange(280)
         member_data.bank += earning
         await ctx.send(f"bạn làm việc tại khu công nghiệp và kiếm được {earning}$!")
         save_member_data(message.author.id, member_data)
-    elif(message.content.lower() == "2"):
+    elif message.content.lower() == "2":
         member_data = load_member_data(message.author.id)
         earning = random.randrange(290)
         member_data.bank += earning
         await ctx.send(f"bạn làm việc tại khu dịch vụ và kiếm được {earning}$!")
         save_member_data(message.author.id, member_data)
-    elif(message.content.lower() == "3"):
+    elif message.content.lower() == "3":
         member_data = load_member_data(message.author.id)
         earning = random.randrange(275)
         member_data.bank += earning
@@ -384,7 +384,7 @@ async def keobuabao(ctx):
 @bot.command()
 async def vuatiengviet(ctx):
     url_vuatiengviet = 'https://manhict.tech/vuatiengviet/image?word='
-    word_vuatiengviet = ["admin bot đẹp trai vl", "tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt"]
+    word_vuatiengviet = ["admin bot đẹp trai vl", "tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ"]
     random_word_vuatiengviet = random.choice(word_vuatiengviet)
     full_url_vuatiengviet = url_vuatiengviet + random_word_vuatiengviet
     get_vuatiengviet = requests.get(full_url_vuatiengviet)
@@ -471,4 +471,4 @@ def save_member_data(member_ID, member_data):
 
     with open(data_filename, "wb") as file:
         pickle.dump(data, file)
-bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.GBUlFa.aF89QPCNs3g6cgHT-5dtDxXHXEP-AMODGB1R78')
+bot.run('token')
