@@ -17,7 +17,7 @@ data_filename = "data.pickle"
 async def help(ctx):
     em = discord.Embed(title = "help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot")
     em.add_field(name = "info command", value = "xsmb, covid19, weather, youtube_search")
-    em.add_field(name = "game command", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ)")
+    em.add_field(name = "game command", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu")
     em.add_field(name = "role play command", value = "balance, withdraw, deposit, shop_buy, shop_sell, work")
     em.add_field(name = "default command bot", value = "help, offbot, ping")
     em.add_field(name = "fun command", value = "thinh, mark, tiki")
