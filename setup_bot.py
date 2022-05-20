@@ -465,7 +465,8 @@ async def noitu(ctx):
             await ctx.send('bạn thắng rồi:((')
             break
         if message.content == "quit":
-            await ctx.send('end game')
+            await ctx.send('bạn thua rồiiiii:)')
+            break
         else:
             await ctx.send(word_noitu)
 #Functions
