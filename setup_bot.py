@@ -444,7 +444,7 @@ async def dhbc(ctx):
         def check(m):
             return m.author.id == ctx.author.id
         message = await bot.wait_for('message', check=check)
-        if str(message.content) == dapan:
+        if str(message.content.upper()) == dapan:
             await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
         else:
             await ctx.send(f'sai rồi, đáp án là {dapan}')
