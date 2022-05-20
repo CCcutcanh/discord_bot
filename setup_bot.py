@@ -470,4 +470,4 @@ def save_member_data(member_ID, member_data):
 
     with open(data_filename, "wb") as file:
         pickle.dump(data, file)
-bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.GBUlFa.aF89QPCNs3g6cgHT-5dtDxXHXEP-AMODGB1R78')
+bot.run('token')
