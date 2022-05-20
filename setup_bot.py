@@ -448,6 +448,26 @@ async def dhbc(ctx):
             await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
         else:
             await ctx.send(f'sai rồi, đáp án là {dapan}')
+@bot.command()
+async def noitu(ctx):
+    await ctx.send('đã bắt đầu, hãy mở đầu trò chơi với một từ đầu tiên')
+    while True:
+        def check(m):
+            return m.author.id == ctx.author.id
+        message = await bot.wait_for('message', check=check)
+        url_noitu = 'https://manhict.tech/game/linkword?word='
+        full_url_noitu = url_noitu + str(message.content)
+        get_noitu = requests.get(full_url_noitu)
+        data_noitu = get_noitu.text
+        json_noitu = json.loads(data_noitu)
+        word_noitu = json_noitu['text']
+        if "thua" in word_noitu:
+            await ctx.send('bạn thắng rồi:((')
+            break
+        if message.content == "quit":
+            await ctx.send('end game')
+        else:
+            await ctx.send(word_noitu)
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
