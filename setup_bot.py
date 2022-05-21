@@ -384,7 +384,7 @@ async def keobuabao(ctx):
 @bot.command()
 async def vuatiengviet(ctx):
     url_vuatiengviet = 'https://manhict.tech/vuatiengviet/image?word='
-    word_vuatiengviet = ["admin bot đẹp trai vl", "tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ"]
+    word_vuatiengviet = ["tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ", "nông nghiệp", "băng hà", "hiếu động", "sung sức"]
     random_word_vuatiengviet = random.choice(word_vuatiengviet)
     full_url_vuatiengviet = url_vuatiengviet + random_word_vuatiengviet
     get_vuatiengviet = requests.get(full_url_vuatiengviet)
@@ -469,6 +469,24 @@ async def noitu(ctx):
             break
         else:
             await ctx.send(word_noitu)
+@bot.command()
+async def taoanhdep(ctx):
+    await ctx.send('nhập để tạo ảnh theo mẫu sau:\n<id nhân vật> | <chữ nền> | <chữ kí>')
+    def check(m):
+        return m.author.id == ctx.author.id
+    message = await bot.wait_for('message', check=check)
+    url_taoanhdep = 'https://manhict.tech/taoanhdep/avatarwibu?id='
+    value = message.content.lower().split(" | ")
+    id_taoanhdep = str(value[0])
+    chunen = str(value[1])
+    chuky = str(value[2])
+    complete_url_taoanhdep = url_taoanhdep + id_taoanhdep + "&chu_nen=" + chunen + "&chu_ky=" + chuky + "&apikey=KeyTest"
+    get_taoanhdep = requests.get(complete_url_taoanhdep)
+    file = open("taoanhdep.png", "wb")
+    file.write(get_taoanhdep.content)
+    file.close()
+    await ctx.send('ảnh của bạn đây:>', file = discord.File('taoanhdep.png'))
+
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -493,4 +511,4 @@ def save_member_data(member_ID, member_data):
     with open(data_filename, "wb") as file:
         pickle.dump(data, file)
 bot.run('token')
-#credit: Duc Anh
+#credit: Duc Anh 
