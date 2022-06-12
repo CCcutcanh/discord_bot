@@ -10,6 +10,7 @@ import pickle
 import youtube_dl
 import os
 import random
+from googletrans import Translator
 bot = commands.Bot(command_prefix='/')
 bot.remove_command("help")
 data_filename = "data.pickle"
@@ -20,7 +21,7 @@ async def help(ctx):
     em.add_field(name = "game command", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu")
     em.add_field(name = "role play command", value = "balance, withdraw, deposit, shop_buy, shop_sell, work")
     em.add_field(name = "default command bot", value = "help, offbot, ping")
-    em.add_field(name = "fun command", value = "thinh, mark, tiki")
+    em.add_field(name = "fun command", value = "thinh, mark, tiki, taoanhdep")
 
     await ctx.send(embed = em)
 class Data:
@@ -31,16 +32,12 @@ class Data:
 #run bot
 #client
 @bot.event
-async def on_command_error():
-    if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send('lệnh này đang trong thời gian hồi hãy quay lại sau {:.2f} giây'.format(error.retry_after))
-@bot.event
 async def on_ready():
     print(f'[CLIENT] client completed')
 #covid19
 @bot.command()
 async def covid19(ctx):
-    full_url = 'https://manhict.tech/covid?country=viet%20nam'
+    full_url = 'http://manhict.tech/covid?country=viet%20nam'
     get = requests.get(full_url)
     data = get.text
     parse_json = json.loads(data)
@@ -56,7 +53,7 @@ async def covid19(ctx):
 @bot.command()
 async def xsmb(ctx):
     #xsmb
-    url = 'https://manhict.tech/xsmb'
+    url = 'http://manhict.tech/xsmb'
     get_data = requests.get(url)
     x = get_data.text
     json_xsmb = json.loads(x)
@@ -71,7 +68,7 @@ async def weather(ctx):
     message = await bot.wait_for('message', check=check)
 
                     # base_url variable to store url
-    base_url = "https://manhict.tech/weather/vietnam?area="
+    base_url = "http://manhict.tech/weather/vietnam?area="
                         # complete_url variable to store
                         # complete url address
     complete_url = base_url + str(message.content) + "&type=text"
@@ -118,7 +115,7 @@ async def play_taixiu(ctx):
             return m.author == ctx.author and m.channel == ctx.channel and \
             m.content.lower() in ["hd", "quit", "tai", "xiu", "chan", "le"]
         message = await bot.wait_for('message', check = check)
-        base_url_taixiu = 'https://manhict.tech/game/v2/taixiu?method='
+        base_url_taixiu = 'http://manhict.tech/game/v2/taixiu?method='
         api_key_taixiu = '&apikey=KeyTest'
         full_url_taixiu = base_url_taixiu + str(message.content.lower()) + api_key_taixiu
         get_taixiu = requests.get(full_url_taixiu)
@@ -212,7 +209,7 @@ async def play_taixiu(ctx):
             await ctx.send("cú pháp không hợp lệ, vui lòng gõ lại")
 @bot.command()
 async def dovui(ctx):
-    url_dovui = 'https://manhict.tech/game/dovuiv1'
+    url_dovui = 'http://manhict.tech/game/dovuiv1'
     get_dovui = requests.get(url_dovui)
     data_dovui = get_dovui.text
     json_dovui = json.loads(data_dovui)
@@ -231,33 +228,49 @@ async def dovui(ctx):
         await ctx.send('câu trả lời chính xác, đáp án là {dap_an}'.format(dap_an = str(dap_an)))
     if(message.content != dap_an):
         await ctx.send('chưa chính xác rồiiiii:((, đáp án là {dap_an}'.format(dap_an = str(dap_an)))
-@bot.command()
+@bot.command(name = "work")
 @commands.cooldown(1, 3600, commands.BucketType.user)
 async def work(ctx):
-    await ctx.send('đây là các khu bạn có thể làm việc để kiếm tiền\n1. khu công nghiệp\n2. khu dịch vụ\n3. khu xây dựng')
+    await ctx.send('đây là các việc bạn có thể làm để kiếm tiền\n1. bán vé số\n2. sửa xe\n3. lập trình\n4. thợ hồ\n5. bán hàng online')
     def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1", "2", "3"]
     message = await bot.wait_for('message', check = check)
     if message.content.lower() == "1":
         member_data = load_member_data(message.author.id)
-        earning = random.randrange(280)
+        earning = random.randrange(301)
         member_data.bank += earning
-        await ctx.send(f"bạn làm việc tại khu công nghiệp và kiếm được {earning}$!")
+        await ctx.send(f"bạn bán vé số và kiếm được {earning}$!")
         save_member_data(message.author.id, member_data)
     elif message.content.lower() == "2":
         member_data = load_member_data(message.author.id)
-        earning = random.randrange(290)
+        earning = random.randrange(301)
         member_data.bank += earning
-        await ctx.send(f"bạn làm việc tại khu dịch vụ và kiếm được {earning}$!")
+        await ctx.send(f"bạn làm thợ sửa xe và kiếm được {earning}$!")
         save_member_data(message.author.id, member_data)
     elif message.content.lower() == "3":
         member_data = load_member_data(message.author.id)
-        earning = random.randrange(275)
+        earning = random.randrange(301)
         member_data.bank += earning
-        await ctx.send(f"bạn làm việc tại khu xây dựng và kiếm được {earning}$!")
+        await ctx.send(f"bạn làm lập trình viên và kiếm được {earning}$!")
+        save_member_data(message.author.id, member_data)
+    elif message.content.lower() == "4":
+        member_data = load_member_data(message.author.id)
+        earning = random.randrange(301)
+        member_data.bank += earning
+        await ctx.send(f"bạn làm thợ hồ và kiếm được {earning}$!")
+        save_member_data(message.author.id, member_data)
+    elif message.content.lower() == "5":
+        member_data = load_member_data(message.author.id)
+        earning = random.randrange(301)
+        member_data.bank += earning
+        await ctx.send(f"bạn bán hàng online và kiếm được {earning}$!")
         save_member_data(message.author.id, member_data)
     else:
-        await ctx.send('bạn chỉ được chọn 1 trong 3 nghề trên')
+        await ctx.send('bạn chỉ được chọn 1 trong 5 nghề trên')
+@work.error
+async def work_error(error, ctx):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send('bạn đã làm việc quá nhiều rồi, hãy nghỉ ngơi và quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
 async def balance(message):
     member_data = load_member_data(message.author.id)
@@ -305,7 +318,7 @@ async def shop_buy(ctx):
                 await ctx.send('bạn quá nghèo để mua được máy tính')
     else:
         await ctx.send('sai cú pháp, món đồ bạn cần mua không tồn tại')
-@bot.command()
+@bot.command(name = "withdraw")
 @commands.cooldown(3, 2400, commands.BucketType.user)
 async def withdraw(ctx):
     await ctx.send('nhập số tiền bạn cần rút')
@@ -322,7 +335,11 @@ async def withdraw(ctx):
         save_member_data(message.author.id, member_data)
     else:
         await ctx.send('sai cú pháp')
-@bot.command()
+@withdraw.error
+async def withdraw_error(error, ctx):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send('ngân hàng hỏng ATM rồi:((, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
+@bot.command(name = "deposit")
 @commands.cooldown(3, 2400, commands.BucketType.user)
 async def deposit(ctx):
     await ctx.send('nhập số tiền bạn muốn gửi tiết kiệm vào ngân hàng')
@@ -339,11 +356,15 @@ async def deposit(ctx):
         save_member_data(message.author.id, member_data)
     else:
         await ctx.send('sai cú pháp')
+@deposit.error
+async def deposit_error(error, ctx):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send('ngân hàng đóng cửa rồi, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
 async def thinh(ctx):
     type_data = ["girl", "boy"]
     random_type = random.choice(type_data)
-    full_url_thinh = 'https://manhict.tech/thathinh' + "?type" + random_type
+    full_url_thinh = 'http://manhict.tech/thathinh' + "?type" + random_type
     get_thinh = requests.get(full_url_thinh)
     data_thinh = get_thinh.text
     parse_json_thinh = json.loads(data_thinh)
@@ -358,7 +379,7 @@ async def keobuabao(ctx):
             return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["kéo", "búa", "bao", "quit"]
         message = await bot.wait_for('message', check = check)
         #lấy api 
-        url_keobuabao = 'https://manhict.tech/game/kbb?choose='
+        url_keobuabao = 'http://manhict.tech/game/kbb?choose='
         full_url_keobuabao = url_keobuabao + message.content.lower()
         get_keobuabao = requests.get(full_url_keobuabao)
         data_keobuabao = get_keobuabao.text
@@ -383,7 +404,7 @@ async def keobuabao(ctx):
             break
 @bot.command()
 async def vuatiengviet(ctx):
-    url_vuatiengviet = 'https://manhict.tech/vuatiengviet/image?word='
+    url_vuatiengviet = 'http://manhict.tech/vuatiengviet/image?word='
     word_vuatiengviet = ["tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ", "nông nghiệp", "băng hà", "hiếu động", "sung sức"]
     random_word_vuatiengviet = random.choice(word_vuatiengviet)
     full_url_vuatiengviet = url_vuatiengviet + random_word_vuatiengviet
@@ -406,7 +427,7 @@ async def mark(ctx):
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check=check)
-    url_mark = 'https://manhict.tech/markcmt?text='
+    url_mark = 'http://manhict.tech/markcmt?text='
     full_url_mark = url_mark + str(message.content)
     get_mark = requests.get(full_url_mark)
     file = open("mark.png", "wb")
@@ -419,7 +440,7 @@ async def tiki(ctx):
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check=check)
-    url_tiki = 'https://manhict.tech/tiki?text='
+    url_tiki = 'http://manhict.tech/tiki?text='
     full_url_tiki = url_tiki + str(message.content)
     get_tiki = requests.get(full_url_tiki)
     file = open("tiki.png", "wb")
@@ -428,7 +449,7 @@ async def tiki(ctx):
     await ctx.send('ảnh đây:)', file = discord.File('tiki.png'))
 @bot.command()
 async def dhbc(ctx):
-    url_DHBC = 'https://manhict.tech/game/dhbcv3'
+    url_DHBC = 'http://manhict.tech/game/dhbcv3'
     get_DHBC = requests.get(url_DHBC)
     data_DHBC = get_DHBC.text
     json_DHBC = json.loads(data_DHBC)
@@ -455,7 +476,7 @@ async def noitu(ctx):
         def check(m):
             return m.author.id == ctx.author.id
         message = await bot.wait_for('message', check=check)
-        url_noitu = 'https://manhict.tech/game/linkword?word='
+        url_noitu = 'http://manhict.tech/game/linkword?word='
         full_url_noitu = url_noitu + str(message.content)
         get_noitu = requests.get(full_url_noitu)
         data_noitu = get_noitu.text
@@ -475,7 +496,7 @@ async def taoanhdep(ctx):
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check=check)
-    url_taoanhdep = 'https://manhict.tech/taoanhdep/avatarwibu?id='
+    url_taoanhdep = 'http://manhict.tech/taoanhdep/avatarwibu?id='
     value = message.content.lower().split(" | ")
     id_taoanhdep = str(value[0])
     chunen = str(value[1])
@@ -486,7 +507,29 @@ async def taoanhdep(ctx):
     file.write(get_taoanhdep.content)
     file.close()
     await ctx.send('ảnh của bạn đây:>', file = discord.File('taoanhdep.png'))
-
+@bot.command()
+async def translate(ctx):
+    await ctx.send('nhập văn bản cần dịch')
+    def check(m):
+        return m.author.id == ctx.author.id
+    message = await bot.wait_for('message', check=check)
+    translator = Translator()
+    translated = translator.translate(f'{message.content.lower()}', src='auto', dest='vi')
+ 
+    await ctx.send(translated.text)
+@bot.command()
+async def caunoihay(ctx):
+    sentence = ['Một cách để tận dụng tối đa cuộc sống là xem nó như một cuộc phiêu lưu – William Feather',' Mạnh dạn nói Tôi đã sai là cách ta chấp nhận đối mặt với tình huống khó khăn. Việc đó có phần mạo hiểm nhưng những gì ta nhận được sẽ vượt ngoài sự mong đợi’ - Rich DeVos', 'Tích cực, tự tin và kiên trì là chìa khóa trong cuộc sống. Vì vậy đừng bao giờ từ bỏ chính mình’ – Khalid', 'Yêu tôi hay ghét tôi, cả hai đều có lợi cho tôi. Nếu bạn yêu tôi, tôi sẽ luôn ở trong tim bạn và nếu bạn ghét tôi, tôi sẽ ở trong tâm trí bạn’ – Baland Quandeel', 'Thái độ quan trọng hơn quá khứ, hơn giáo dục, hơn tiền bạc, hơn hoàn cảnh, hơn những gì mọi người làm hoặc nói. Nó quan trọng hơn ngoại hình, năng khiếu hay kỹ năng’ – Charles Swindoll', 'Hãy tin vào chính mình! Có niềm tin vào khả năng của bạn! Nếu không có sự tự tin khiêm tốn nhưng hợp lý vào năng lực của chính mình, bạn không thể thành công hay hạnh phúc’ - Norman Vincent Peale', 'Trong đời người, có hai con đường bằng phẳng không trở ngại: Một là đi tới lý tưởng, một là đi tới cái chết’ - Lev Tolstoy', 'Bạn có thể thay đổi thế giới của mình bằng cách thay đổi lời nói của bạn ... Hãy nhớ rằng, cái chết và sự sống nằm trong sức mạnh của lưỡi’ - Joel Osteen', 'Lạc quan là niềm tin dẫn đến thành tích. Không có gì có thể được thực hiện mà không có hy vọng và sự tự tin’ - Helen Keller']
+    result_sentence = random.choice(sentence)
+    await ctx.send(result_sentence)
+@bot.command()
+async def thayboi(ctx):
+    base_url_thayboi = 'http://manhict.tech/other/thayboi'
+    get_thayboi = requests.get(base_url_thayboi)
+    data_thayboi = get_thayboi.text 
+    json_thayboi = json.loads(data_thayboi)
+    result_thayboi = json_thayboi['data']
+    await ctx.send(result_thayboi)
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -511,4 +554,3 @@ def save_member_data(member_ID, member_data):
     with open(data_filename, "wb") as file:
         pickle.dump(data, file)
 bot.run('token')
-#credit: Duc Anh 
