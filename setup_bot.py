@@ -11,7 +11,8 @@ import youtube_dl
 import os
 import random
 from googletrans import Translator
-bot = commands.Bot(command_prefix='/')
+import asyncio
+bot = commands.Bot(command_prefix='/') 
 bot.remove_command("help")
 data_filename = "data.pickle"
 @bot.group(invoke_without_command=True)
@@ -109,7 +110,7 @@ async def ping(ctx):
     await ctx.send('pong!')
 @bot.command()
 async def play_taixiu(ctx):
-    await ctx.send('đã bắt đầu game tài xỉu, nếu khoong biết luật bạn có thể nhập hd để biết rõ luật chơi')
+    await ctx.send('đã bắt đầu game tài xỉu, nếu không biết luật bạn có thể nhập hd để biết rõ luật chơi và nhập quit để out game')
     while True:
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and \
@@ -121,6 +122,21 @@ async def play_taixiu(ctx):
         get_taixiu = requests.get(full_url_taixiu)
         data_taixiu = get_taixiu.text
         parse_json = json.loads(data_taixiu)
+        img1_taixiu = parse_json['images'][0]
+        get_img1 = requests.get(img1_taixiu)
+        file = open("taixiu1.png", "wb")
+        file.write(get_img1.content)
+        file.close()
+        img2_taixiu = parse_json['images'][1]
+        get_img2 = requests.get(img1_taixiu)
+        file = open("taixiu2.png", "wb")
+        file.write(get_img2.content)
+        file.close()
+        img3_taixiu = parse_json['images'][2]
+        get_img3 = requests.get(img3_taixiu)
+        file = open("taixiu3.png", "wb")
+        file.write(get_img3.content)
+        file.close()
         if (message.content.lower() == "hd"):
             await ctx.send('luật chơi tài xỉu như sau: \n có 3 cách chơi \n cách 1: cược tài/xỉu. Nếu cược xỉu Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 4 đến 10. Nếu cược tài Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 11 đến 17. \n cách 2: cược chẵn/lẻ. Nếu cược chẵn sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 4,6,8,10,12,14,16. Nếu cược lẻ sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 5,7,9,11,13,15,17. \nLưu ý: nếu muốn out game hãy gõ quit, tiền cược mặc định của game là 200$/lần (ko thể thay đổi tại t lười code phần đấy vl:>)')
         if (message.content.lower() == "tai"):
@@ -135,7 +151,7 @@ async def play_taixiu(ctx):
             result_taixiu_tai = """nhà cái ra {nha_cai_ra} ({nha_cai}), bạn chọn {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua), nha_cai_ra = str(nha_cai_ra))
             member_data = load_member_data(message.author.id)
             if ("lose" in result_taixiu_tai):
-                    await ctx.send(result_taixiu_tai.replace("lose", "đã thua 200$"))
+                    await ctx.send(result_taixiu_tai.replace("lose", "đã thua 200$", ), )
                     member_data.wallet -= 200
                     save_member_data(message.author.id, member_data)
                     print(result_taixiu_tai)
@@ -155,7 +171,8 @@ async def play_taixiu(ctx):
             ketqua = parse_json['ketqua']['total']
             result_taixiu_xiu = """nhà cái ra {nha_cai_ra} ({nha_cai}), bạn chọn {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua), nha_cai_ra = str(nha_cai_ra))
             if ("lose" in result_taixiu_xiu):
-                    await ctx.send(result_taixiu_xiu.replace("lose", "đã thua 200$"))
+                    await ctx.send(result_taixiu_xiu.replace("lose", "đã thua 200$"), file = discord.File('taixiu1.png'))
+                    await ctx.send()
                     member_data.wallet -= 200
                     save_member_data(message.author.id, member_data)
                     print(result_taixiu_xiu)
@@ -233,7 +250,7 @@ async def dovui(ctx):
 async def work(ctx):
     await ctx.send('đây là các việc bạn có thể làm để kiếm tiền\n1. bán vé số\n2. sửa xe\n3. lập trình\n4. thợ hồ\n5. bán hàng online')
     def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1", "2", "3"]
+            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1", "2", "3", "4", "5"]
     message = await bot.wait_for('message', check = check)
     if message.content.lower() == "1":
         member_data = load_member_data(message.author.id)
@@ -241,25 +258,25 @@ async def work(ctx):
         member_data.bank += earning
         await ctx.send(f"bạn bán vé số và kiếm được {earning}$!")
         save_member_data(message.author.id, member_data)
-    elif message.content.lower() == "2":
+    if message.content.lower() == "2":
         member_data = load_member_data(message.author.id)
         earning = random.randrange(301)
         member_data.bank += earning
         await ctx.send(f"bạn làm thợ sửa xe và kiếm được {earning}$!")
         save_member_data(message.author.id, member_data)
-    elif message.content.lower() == "3":
+    if message.content.lower() == "3":
         member_data = load_member_data(message.author.id)
         earning = random.randrange(301)
         member_data.bank += earning
         await ctx.send(f"bạn làm lập trình viên và kiếm được {earning}$!")
         save_member_data(message.author.id, member_data)
-    elif message.content.lower() == "4":
+    if message.content.lower() == "4":
         member_data = load_member_data(message.author.id)
         earning = random.randrange(301)
         member_data.bank += earning
         await ctx.send(f"bạn làm thợ hồ và kiếm được {earning}$!")
         save_member_data(message.author.id, member_data)
-    elif message.content.lower() == "5":
+    if message.content.lower() == "5":
         member_data = load_member_data(message.author.id)
         earning = random.randrange(301)
         member_data.bank += earning
@@ -280,8 +297,11 @@ async def balance(message):
     embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
 
     await message.channel.send(embed=embed)
-@bot.command()
-async def shop_sell(ctx):
+@bot.group(invoke_without_command=True)
+async def shop(ctx):
+    await ctx.send('nơi mua bán các vật trong bot\nhãy chọn shop sell(bán đồ) hoặc shop buy(mua đồ)')
+@shop.command()
+async def sell(ctx):
     await ctx.send('đồ có thể bán\n1. máy tính: 700 tiền\nLưu ý: đây chỉ là lệnh đag thử nghiệm, sẽ update sau')
     def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1"]
@@ -298,8 +318,8 @@ async def shop_sell(ctx):
     else:
         await ctx.send('đồ bạn muốn bán không hợp lệ')
         save_member_data(message.author.id, member_data)
-@bot.command()
-async def shop_buy(ctx):
+@shop.command()
+async def buy(ctx):
     await ctx.send('đồ có thể mua\n1. pc: 1500 tiền,')
     def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1"]
@@ -318,17 +338,23 @@ async def shop_buy(ctx):
                 await ctx.send('bạn quá nghèo để mua được máy tính')
     else:
         await ctx.send('sai cú pháp, món đồ bạn cần mua không tồn tại')
-@bot.command(name = "withdraw")
+@bot.group(invoke_without_command=True)
+async def bank(ctx):
+    embed = discord.Embed(title="MIRAI BANK", description="nơi gửi và rút tiền từ ngân hàng", color=0x00ff00)
+    embed.add_field(name = "cách sử dụng", value = "/bank withdraw, /bank deposit") #creates embed
+    file = discord.File(r"C:\codde\discord_bot\image\bank.png", filename="bank.png") 
+    embed.set_image(url="attachment://bank.png")
+    await ctx.send(file=file, embed=embed)
+@bank.command()
 @commands.cooldown(3, 2400, commands.BucketType.user)
 async def withdraw(ctx):
-    await ctx.send('nhập số tiền bạn cần rút')
+    member_data = load_member_data(message.author.id)
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check=check)
     if "withdraw" in message.content.lower():
         split = message.content.lower().split(" ")
         value = int(split[1])
-        member_data = load_member_data(message.author.id)
         member_data.bank -= value
         member_data.wallet += value
         await ctx.send(f'đã rút thành công {value}$ vào ví')
@@ -339,7 +365,7 @@ async def withdraw(ctx):
 async def withdraw_error(error, ctx):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('ngân hàng hỏng ATM rồi:((, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
-@bot.command(name = "deposit")
+@bank.command(name = "deposit")
 @commands.cooldown(3, 2400, commands.BucketType.user)
 async def deposit(ctx):
     await ctx.send('nhập số tiền bạn muốn gửi tiết kiệm vào ngân hàng')
@@ -405,7 +431,7 @@ async def keobuabao(ctx):
 @bot.command()
 async def vuatiengviet(ctx):
     url_vuatiengviet = 'http://manhict.tech/vuatiengviet/image?word='
-    word_vuatiengviet = ["tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ", "nông nghiệp", "băng hà", "hiếu động", "sung sức"]
+    word_vuatiengviet = ["tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ", "nông nghiệp", "băng hà", "hiếu động", "sung sức", "công lao", "tâm tình", "cờ bạc"]
     random_word_vuatiengviet = random.choice(word_vuatiengviet)
     full_url_vuatiengviet = url_vuatiengviet + random_word_vuatiengviet
     get_vuatiengviet = requests.get(full_url_vuatiengviet)
@@ -530,6 +556,31 @@ async def thayboi(ctx):
     json_thayboi = json.loads(data_thayboi)
     result_thayboi = json_thayboi['data']
     await ctx.send(result_thayboi)
+@bot.group(invoke_without_command=True)
+async def truyentranh24(ctx):
+    await ctx.send('tìm truyện trên truyentranh24.com\n/truyentranh24 search')
+@truyentranh24.command()
+async def search(ctx):
+    await ctx.send('nhập tên truyện cần tìm')
+    def check(m):
+        return m.author.id == ctx.author.id
+    message = await bot.wait_for('message', check=check)
+    full_url_search = 'https://goatbot.tk/truyentranh24/search?q=' + str(message.content.lower()) + '&apikey=ntkhang'
+    get_search = requests.get(full_url_search)
+    json = get_search.json()
+    name = json['data'][0]['name']
+    img = json['data'][0]['thumbnail']
+    get_img = requests.get(img)
+    file = open("truyentranh24.png", "wb")
+    file.write(get_img.content)
+    file.close()
+    href = json['data'][0]['href']  
+    result = str(name) + '\n' + 'href: ' + str(href) + ' (dùng khi sử dụng lệnh đọc tryện)'
+    await ctx.send(result, file = discord.File('truyentranh24.png'))
+@bot.command()
+async def test(ctx):
+    files = [{"filename": "taixiu1.png", "content": "taixiu1"}, {"filename": "taixiu2.png", "content": "taixiu2"}, {"filename": "taixiu3.png", "content": "taixiu3"}]
+    await asyncio.wait([ctx.send(file=discord.File(f['filename']), content=f['content']) for f in files])
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -553,4 +604,4 @@ def save_member_data(member_ID, member_data):
 
     with open(data_filename, "wb") as file:
         pickle.dump(data, file)
-bot.run('token')
+bot.run('')
