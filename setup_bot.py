@@ -151,7 +151,7 @@ async def play_taixiu(ctx):
             result_taixiu_tai = """nhà cái ra {nha_cai_ra} ({nha_cai}), bạn chọn {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua), nha_cai_ra = str(nha_cai_ra))
             member_data = load_member_data(message.author.id)
             if ("lose" in result_taixiu_tai):
-                    await ctx.send(result_taixiu_tai.replace("lose", "đã thua 200$", ), )
+                    await ctx.send(result_taixiu_tai.replace("lose", "đã thua 200$"))
                     member_data.wallet -= 200
                     save_member_data(message.author.id, member_data)
                     print(result_taixiu_tai)
