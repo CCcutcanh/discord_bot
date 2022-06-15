@@ -151,7 +151,7 @@ async def play_taixiu(ctx):
             result_taixiu_tai = """nhà cái ra {nha_cai_ra} ({nha_cai}), bạn chọn {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua), nha_cai_ra = str(nha_cai_ra))
             member_data = load_member_data(message.author.id)
             if ("lose" in result_taixiu_tai):
-                    await ctx.send(result_taixiu_tai.replace("lose", "đã thua 200$"))
+                    await ctx.send(result_taixiu_tai.replace("lose", "đã thua 200$", ), )
                     member_data.wallet -= 200
                     save_member_data(message.author.id, member_data)
                     print(result_taixiu_tai)
@@ -347,41 +347,24 @@ async def bank(ctx):
     await ctx.send(file=file, embed=embed)
 @bank.command()
 @commands.cooldown(3, 2400, commands.BucketType.user)
-async def withdraw(ctx):
-    member_data = load_member_data(message.author.id)
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check=check)
-    if "withdraw" in message.content.lower():
-        split = message.content.lower().split(" ")
-        value = int(split[1])
-        member_data.bank -= value
-        member_data.wallet += value
-        await ctx.send(f'đã rút thành công {value}$ vào ví')
-        save_member_data(message.author.id, member_data)
+async def withdraw(ctx, arg = None):
+    if arg == None:
+        await ctx.send('nhập số tiền cần rút')
     else:
-        await ctx.send('sai cú pháp')
+        await ctx.send(f'đã rút {arg}$ từ tài khoản')
+        update(ctx.message.author.id, arg, 'bank')
 @withdraw.error
 async def withdraw_error(error, ctx):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('ngân hàng hỏng ATM rồi:((, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bank.command(name = "deposit")
 @commands.cooldown(3, 2400, commands.BucketType.user)
-async def deposit(ctx):
-    await ctx.send('nhập số tiền bạn muốn gửi tiết kiệm vào ngân hàng')
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check=check)
-    if "deposit" in message.content.lower():
-        split = message.content.lower().split(" ")
-        value = int(split[1])
-        member_data = load_member_data(message.author.id)
-        member_data.bank += value
-        member_data.wallet -= value
-        await ctx.send(f'đã gửi thành công {value}$ vào ngân hàng')
-        save_member_data(message.author.id, member_data)
+async def deposit(ctx, arg = None):
+    if arg == None:
+        await ctx.send('nhập số tiền cần bỏ vào tài khoản')
     else:
-        await ctx.send('sai cú pháp')
+        await ctx.send(f'đã trừ {arg}$ của ví')
+        update(ctx.message.author.id, arg, 'wallet')
 @deposit.error
 async def deposit_error(error, ctx):
     if isinstance(error, commands.CommandOnCooldown):
@@ -475,19 +458,19 @@ async def tiki(ctx):
     await ctx.send('ảnh đây:)', file = discord.File('tiki.png'))
 @bot.command()
 async def dhbc(ctx):
-    url_DHBC = 'http://manhict.tech/game/dhbcv3'
+    url_DHBC = 'https://goatbot.tk/api/duoihinhbatchu'
     get_DHBC = requests.get(url_DHBC)
     data_DHBC = get_DHBC.text
     json_DHBC = json.loads(data_DHBC)
-    image_DHBC = json_DHBC['image1and2'] 
-    sokt = json_DHBC['soluongkt']
-    dapan = json_DHBC['wordcomplete']
+    image_DHBC = json_DHBC['data']['image1and2'] 
+    sokt = json_DHBC['data']['soluongkt']
+    dapan = json_DHBC['data']['wordcomplete']
     get_image_DHBC = requests.get(image_DHBC)
     file = open("DHBC.png", "wb")
     file.write(get_image_DHBC.content)
     file.close()
     await ctx.send(f'đây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
-    if "m" in url_DHBC:
+    if "g" in url_DHBC:
         def check(m):
             return m.author.id == ctx.author.id
         message = await bot.wait_for('message', check=check)
@@ -502,13 +485,13 @@ async def noitu(ctx):
         def check(m):
             return m.author.id == ctx.author.id
         message = await bot.wait_for('message', check=check)
-        url_noitu = 'http://manhict.tech/game/linkword?word='
+        url_noitu = 'https://goatbot.tk/api/wordlink?text='
         full_url_noitu = url_noitu + str(message.content)
         get_noitu = requests.get(full_url_noitu)
         data_noitu = get_noitu.text
         json_noitu = json.loads(data_noitu)
-        word_noitu = json_noitu['text']
-        if "thua" in word_noitu:
+        word_noitu = json_noitu['data']
+        if "lose" in word_noitu:
             await ctx.send('bạn thắng rồi:((')
             break
         if message.content == "quit":
@@ -578,9 +561,12 @@ async def search(ctx):
     result = str(name) + '\n' + 'href: ' + str(href) + ' (dùng khi sử dụng lệnh đọc tryện)'
     await ctx.send(result, file = discord.File('truyentranh24.png'))
 @bot.command()
-async def test(ctx):
-    files = [{"filename": "taixiu1.png", "content": "taixiu1"}, {"filename": "taixiu2.png", "content": "taixiu2"}, {"filename": "taixiu3.png", "content": "taixiu3"}]
-    await asyncio.wait([ctx.send(file=discord.File(f['filename']), content=f['content']) for f in files])
+async def test(ctx, arg = None):
+    if arg == None:
+        await ctx.send('nhập số tiền cần bỏ vào tài khoản')
+    else:
+        await ctx.send(f'đã trừ {arg}$ của ví')
+        update(ctx.message.author.id, arg, 'wallet')
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -604,5 +590,16 @@ def save_member_data(member_ID, member_data):
 
     with open(data_filename, "wb") as file:
         pickle.dump(data, file)
-bot.run('')
-#credit: Duc Anh
+def update(user, change, mode):
+    member_data = load_member_data(user)
+    if mode == 'wallet':
+        member_data.wallet -= int(change)
+        member_data.bank += int(change)
+        save_member_data(user, member_data)
+    elif mode == 'bank':
+        member_data.wallet += int(change)
+        member_data.bank -= int(change)
+        save_member_data(user, member_data)
+    else:
+        print('error')
+bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.G3P8AW.dVM34cGffFyx6hbTZpis5uPXSP2DMHhsLV_3eY')
