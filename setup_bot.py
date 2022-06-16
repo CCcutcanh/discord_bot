@@ -582,6 +582,10 @@ async def wiki(ctx, *, arg = None):
         result = wikipedia.summary(f"{arg}", sentences=5)
         await ctx.send(result)
 @bot.command()
+async def callad(ctx, arg = None):
+    user = await bot.fetch_user("716146182849560598")
+    await user.send(f"báo cáo từ {ctx.message.author}\nnội dung: {arg}")
+@bot.command()
 async def test(ctx, arg = None):
     if arg == None:
         await ctx.send('nhập tin nhắn cần báo cáo về admin')
