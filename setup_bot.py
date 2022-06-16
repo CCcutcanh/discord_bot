@@ -628,4 +628,5 @@ def update(user, change, mode):
         save_member_data(user, member_data)
     else:
         print('error')
-bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.Gip6q1.xrWIh8ZvUcEOE-yXK_UHH7kKccrLynHrc8zRxw')
+bot.run('token')
+#credit code: Duc Anh
