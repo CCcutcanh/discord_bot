@@ -12,6 +12,7 @@ import os
 import random
 from googletrans import Translator
 import asyncio
+import wikipedia
 bot = commands.Bot(command_prefix='/') 
 bot.remove_command("help")
 data_filename = "data.pickle"
@@ -371,46 +372,43 @@ async def deposit_error(error, ctx):
         await ctx.send('ngân hàng đóng cửa rồi, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
 async def thinh(ctx):
-    type_data = ["girl", "boy"]
-    random_type = random.choice(type_data)
-    full_url_thinh = 'http://manhict.tech/thathinh' + "?type" + random_type
-    get_thinh = requests.get(full_url_thinh)
-    data_thinh = get_thinh.text
-    parse_json_thinh = json.loads(data_thinh)
-    infomation = parse_json_thinh['result']['data']
-    await ctx.send(infomation)
+    global random, json
+    url = 'https://raw.githubusercontent.com/ledingg1997/ledingg-/main/datathinh.json'
+    random_thinh = random.randint(1, 187)
+    get = requests.get(url)
+    data = get.text
+    data_json = json.loads(data)
+    result = data_json['data'][f'{random_thinh}']
+    await ctx.send(result)
 @bot.command()
-async def keobuabao(ctx):
-    await ctx.send('nhập kéo, búa, bao mức tiền cược mặc định là 50$/lần')
-    while True:
-        #get user input
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["kéo", "búa", "bao", "quit"]
-        message = await bot.wait_for('message', check = check)
-        #lấy api 
-        url_keobuabao = 'http://manhict.tech/game/kbb?choose='
-        full_url_keobuabao = url_keobuabao + message.content.lower()
-        get_keobuabao = requests.get(full_url_keobuabao)
-        data_keobuabao = get_keobuabao.text
-        parse_json_keobuabao = json.loads(data_keobuabao)
-        result_keobuabao = parse_json_keobuabao['data']
-        if("thua" in result_keobuabao):
-            member_data = load_member_data(message.author.id)
-            await ctx.send(result_keobuabao.replace("thua", "thua 50$")) 
-            member_data.wallet -= 50
-            save_member_data(message.author.id, member_data)
-        elif("thắng" in result_keobuabao):
-            member_data = load_member_data(message.author.id)
-            await ctx.send(result_keobuabao.replace("thắng", "thắng 50$"))
-            member_data.wallet += 50
-            save_member_data(message.author.id, member_data)
-        elif("hòa" in result_keobuabao):
-            member_data = load_member_data(message.author.id)
-            await ctx.send(result_keobuabao)
-            save_member_data(message.author.id, member_data)
-        elif (message.content.lower() == "quit"):
-            await ctx.send('end game!')
-            break
+async def keobuabao(ctx, arg1 = None, arg2 = None):
+    member_data = load_member_data(ctx.message.author.id)
+    choice = ['kéo', 'búa', 'bao']
+    bot = random.choice(choice)
+    if arg1 == None or arg2 == None or arg1 == None and arg2 == None:
+        await ctx.send('chỉ nhập kéo, búa hoặc bao')
+    elif arg1 == bot:
+        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Hòa')
+    elif arg1 == 'bao' and bot == 'búa':
+        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Bạn đã thắng và nhận đươc {arg2}$')
+        update(ctx.message.author.id, arg2, 'keobuabao_win')
+    elif arg1 == 'bao' and bot == 'kéo':
+        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
+        update(ctx.message.author.id, arg2, 'keobuabao_lose')
+    elif arg1 == 'kéo' and bot == 'búa':
+        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
+        update(ctx.message.author.id, arg2, 'keobuabao_lose')
+    elif arg1 == 'kéo' and bot == 'bao':
+        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thắng và nhận được {arg2}$')
+        update(ctx.message.author.id, arg2, 'keobuabao_win')
+    elif arg1 == 'búa' and bot == 'bao':
+        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
+        update(ctx.message.author.id, arg2, 'keobuabao_lose')
+    elif arg1 == 'búa' and bot == 'kéo':
+        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thắng và nhận được {arg2}$')
+        update(ctx.message.author.id, arg2, 'keobuabao_win')
+    else:
+        await ctx.send('lỗi')
 @bot.command()
 async def vuatiengviet(ctx):
     url_vuatiengviet = 'http://manhict.tech/vuatiengviet/image?word='
@@ -505,12 +503,12 @@ async def taoanhdep(ctx):
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check=check)
-    url_taoanhdep = 'http://manhict.tech/taoanhdep/avatarwibu?id='
+    url_taoanhdep = 'https://goatbot.tk/taoanhdep/avataranime?apikey=ntkhangGoatBot'
     value = message.content.lower().split(" | ")
     id_taoanhdep = str(value[0])
     chunen = str(value[1])
     chuky = str(value[2])
-    complete_url_taoanhdep = url_taoanhdep + id_taoanhdep + "&chu_nen=" + chunen + "&chu_ky=" + chuky + "&apikey=KeyTest"
+    complete_url_taoanhdep = url_taoanhdep + "&chu_Nen=" + chunen + "&chu_Ky=" + chuky + "&id=" +id_taoanhdep 
     get_taoanhdep = requests.get(complete_url_taoanhdep)
     file = open("taoanhdep.png", "wb")
     file.write(get_taoanhdep.content)
@@ -561,12 +559,34 @@ async def search(ctx):
     result = str(name) + '\n' + 'href: ' + str(href) + ' (dùng khi sử dụng lệnh đọc tryện)'
     await ctx.send(result, file = discord.File('truyentranh24.png'))
 @bot.command()
+async def shopmaihuong(ctx):
+    await ctx.send('nhập tin nhắn để tạo ảnh theo mẫu sau:\ntext1 | text2')
+    def check(m):
+        return m.author.id == ctx.author.id
+    message = await bot.wait_for('message', check=check)
+    value = message.content.lower().split(" | ")
+    text1 = str(value[0])
+    text2 = str(value[1])
+    url = 'https://manhict.tech/shopmaihuong?text1=' + text1 + "&text2=" + text2
+    get = requests.get(url)
+    file = open("shopmaihuong.png", "wb")
+    file.write(get.content)
+    file.close()
+    await ctx.send('ảnh của bạn đây:)', file = discord.File('shopmaihuong.png'))
+@bot.command()
+async def wiki(ctx, *, arg = None):
+    if arg == None:
+        await ctx.send('/wiki <keyword>\nphần tìm kiếm không được để trống')
+    else:
+        wikipedia.set_lang("vi")
+        result = wikipedia.summary(f"{arg}", sentences=5)
+        await ctx.send(result)
+@bot.command()
 async def test(ctx, arg = None):
     if arg == None:
-        await ctx.send('nhập số tiền cần bỏ vào tài khoản')
+        await ctx.send('nhập tin nhắn cần báo cáo về admin')
     else:
-        await ctx.send(f'đã trừ {arg}$ của ví')
-        update(ctx.message.author.id, arg, 'wallet')
+        
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -600,7 +620,12 @@ def update(user, change, mode):
         member_data.wallet += int(change)
         member_data.bank -= int(change)
         save_member_data(user, member_data)
+    elif mode == 'keobuabao_win':
+        member_data.wallet += int(change)
+        save_member_data(user, member_data)
+    elif mode == 'keobuabao_lose':
+        member_data.wallet -= int(change)
+        save_member_data(user, member_data)
     else:
         print('error')
-bot.run('')
-#credit code: Duc Anh
+bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.Gip6q1.xrWIh8ZvUcEOE-yXK_UHH7kKccrLynHrc8zRxw')
