@@ -13,6 +13,8 @@ import random
 from googletrans import Translator
 import asyncio
 import wikipedia
+import datetime
+import time
 bot = commands.Bot(command_prefix='/') 
 bot.remove_command("help")
 data_filename = "data.pickle"
@@ -63,15 +65,27 @@ async def xsmb(ctx):
     await ctx.send(data_xsmb)
 #weather
 @bot.command()
-async def weather(ctx, arg = None):
+async def weather(ctx, *, arg = None):
+    url = f'https://api.openweathermap.org/data/2.5/weather?q={arg}&lang=vi&appid=f5e58e5107262dd200ef30cc9e47355a'
+    get = requests.get(url)
+    data_txt = get.text
+    data_json = json.loads(data_txt)
     if arg == None:
         await ctx.send('sai cú pháp')
-    else:
+    elif data_json['cod'] != "404":
         url = f'https://api.openweathermap.org/data/2.5/weather?q={arg}&lang=vi&appid=f5e58e5107262dd200ef30cc9e47355a'
         get = requests.get(url)
         data_txt = get.text
         data_json = json.loads(data_txt)
-        cod = data_json[]
+        temp_min = data_json['main']['temp_min']
+        temp_max = data_json['main']['temp_max']
+        feel_like = data_json['main']['feels_like'] 
+        sunrise = datetime.datetime.fromtimestamp(int(data_json['sys']['sunrise']))
+        sunset = datetime.datetime.fromtimestamp(int(data_json['sys']['sunset']))
+        description = data_json['weather'][0]['description']      
+        await ctx.send(f'🌡️nhiệt độ cao nhât - thấp nhất: {temp_max} - {temp_min}\n🌡️nhiệt độ cảm nhận được: {feel_like}\n🌅mặt trời mọc: {sunrise}\n🌄mặt trời lặn: {sunset}\n🗄️mô tả: {description}')
+    else:
+        await ctx.send('thành phố không tồn tại')
 @bot.command()
 async def youtube_search(ctx):
     await ctx.send('nhập từ khóa cần tìm kiếm')
@@ -602,7 +616,7 @@ async def daily_error(ctx, error):
         await ctx.send('bạn đã nhận thưởng ngày hôm nay rồi hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
 async def test(ctx):
-
+    pass
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -644,4 +658,5 @@ def update(user, change, mode):
         save_member_data(user, member_data)
     else:
         print('error')
-bot.run('')
+bot.run('token')
+#credit code: Duc Anh 
