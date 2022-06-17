@@ -19,11 +19,11 @@ data_filename = "data.pickle"
 @bot.group(invoke_without_command=True)
 async def help(ctx):
     em = discord.Embed(title = "help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot")
-    em.add_field(name = "info command", value = "xsmb, covid19, weather, youtube_search")
+    em.add_field(name = "other command", value = "xsmb, covid19, weather, youtube_search, translate, truyentranh24, wiki")
     em.add_field(name = "game command", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu")
-    em.add_field(name = "role play command", value = "balance, withdraw, deposit, shop_buy, shop_sell, work")
+    em.add_field(name = "role play command", value = "balance, bank, shop, work")
     em.add_field(name = "default command bot", value = "help, offbot, ping")
-    em.add_field(name = "fun command", value = "thinh, mark, tiki, taoanhdep")
+    em.add_field(name = "fun command", value = "thinh, mark, tiki, taoanhdep, shopmaihuong")
 
     await ctx.send(embed = em)
 class Data:
@@ -63,29 +63,15 @@ async def xsmb(ctx):
     await ctx.send(data_xsmb)
 #weather
 @bot.command()
-async def weather(ctx):
-    await ctx.send('nhập tên thành phố')
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check=check)
-
-                    # base_url variable to store url
-    base_url = "http://manhict.tech/weather/vietnam?area="
-                        # complete_url variable to store
-                        # complete url address
-    complete_url = base_url + str(message.content) + "&type=text"
-    #get text
-    response = requests.get(complete_url)
-    data_weather = response.text
-    json_weather = json.loads(data_weather)
-    result_weather = json_weather['data']
-    #get image
-    url_image = complete_url + ".png" 
-    response_image = requests.get(url_image)
-    file = open("weather.png", "wb")
-    file.write(response_image.content)
-    file.close()
-    await ctx.send(result_weather, file = discord.File('weather.png'))
+async def weather(ctx, arg = None):
+    if arg == None:
+        await ctx.send('sai cú pháp')
+    else:
+        url = f'https://api.openweathermap.org/data/2.5/weather?q={arg}&lang=vi&appid=f5e58e5107262dd200ef30cc9e47355a'
+        get = requests.get(url)
+        data_txt = get.text
+        data_json = json.loads(data_txt)
+        cod = data_json[]
 @bot.command()
 async def youtube_search(ctx):
     await ctx.send('nhập từ khóa cần tìm kiếm')
@@ -285,8 +271,11 @@ async def work(ctx):
         save_member_data(message.author.id, member_data)
     else:
         await ctx.send('bạn chỉ được chọn 1 trong 5 nghề trên')
+@bot.event
+async def on_command_error(ctx, error):
+    pass
 @work.error
-async def work_error(error, ctx):
+async def work_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('bạn đã làm việc quá nhiều rồi, hãy nghỉ ngơi và quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
@@ -343,7 +332,7 @@ async def buy(ctx):
 async def bank(ctx):
     embed = discord.Embed(title="MIRAI BANK", description="nơi gửi và rút tiền từ ngân hàng", color=0x00ff00)
     embed.add_field(name = "cách sử dụng", value = "/bank withdraw, /bank deposit") #creates embed
-    file = discord.File(r"C:\codde\discord_bot\image\bank.png", filename="bank.png") 
+    file = discord.File(r"image\bank.png", filename="bank.png") 
     embed.set_image(url="attachment://bank.png")
     await ctx.send(file=file, embed=embed)
 @bank.command()
@@ -355,11 +344,11 @@ async def withdraw(ctx, arg = None):
         await ctx.send(f'đã rút {arg}$ từ tài khoản')
         update(ctx.message.author.id, arg, 'bank')
 @withdraw.error
-async def withdraw_error(error, ctx):
+async def withdraw_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('ngân hàng hỏng ATM rồi:((, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bank.command(name = "deposit")
-@commands.cooldown(3, 2400, commands.BucketType.user)
+@commands.cooldown(1, 2400, commands.BucketType.user)
 async def deposit(ctx, arg = None):
     if arg == None:
         await ctx.send('nhập số tiền cần bỏ vào tài khoản')
@@ -367,7 +356,7 @@ async def deposit(ctx, arg = None):
         await ctx.send(f'đã trừ {arg}$ của ví')
         update(ctx.message.author.id, arg, 'wallet')
 @deposit.error
-async def deposit_error(error, ctx):
+async def deposit_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('ngân hàng đóng cửa rồi, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
@@ -582,16 +571,38 @@ async def wiki(ctx, *, arg = None):
         result = wikipedia.summary(f"{arg}", sentences=5)
         await ctx.send(result)
 @bot.command()
-async def callad(ctx, arg = None):
+async def callad(ctx, *, arg=None):
     user = await bot.fetch_user("716146182849560598")
-    await user.send(f"báo cáo từ {ctx.message.author}\nnội dung: {arg}")
+    await user.send(f"báo cáo từ {ctx.message.author}\ntừ nhóm: {ctx.channel.id}\nnội dung: {arg}")
     await ctx.send('đã báo cáo về admin thành công')
 @bot.command()
-async def test(ctx, arg = None):
-    if arg == None:
-        await ctx.send('nhập tin nhắn cần báo cáo về admin')
-    else:
-        
+async def sendnoti(ctx):
+    await ctx.send('nhập theo mẫu sau:\n<id channel> | phản hồi user | phản hồi channel')
+    def check(m):
+        return m.author.id == ctx.author.id
+    message = await bot.wait_for('message', check=check)
+    value = message.content.lower().split(" | ")
+    id_channel = str(value[0])
+    reply_user = str(value[1])
+    reply_channel = str(value[2])
+    channel = await bot.fetch_channel(id_channel)
+    user = await bot.fetch_user(f"{ctx.message.author.id}")
+    await user.send(f'cảm ơn bạn về đóng góp, sau đây là phản hồi của admin:\n{reply_user}')
+    await channel.send(f'phản hồi từ admin đến kênh:\nnội dung: {reply_channel}')
+@bot.command()
+@commands.cooldown(1, 86400, commands.BucketType.user)
+async def daily(ctx):
+    member_data = load_member_data(ctx.message.author.id)
+    member_data.wallet += 100
+    save_member_data(ctx.message.author.id, member_data)
+    await ctx.send('nhận thưởng ngày thành công 100$')
+@daily.error
+async def daily_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send('bạn đã nhận thưởng ngày hôm nay rồi hãy quay lại sau {:.2f} giây'.format(error.retry_after))
+@bot.command()
+async def test(ctx):
+
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -633,5 +644,4 @@ def update(user, change, mode):
         save_member_data(user, member_data)
     else:
         print('error')
-bot.run('token')
-#credit code: Duc Anh
+bot.run('')
