@@ -353,7 +353,7 @@ async def withdraw_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('ngân hàng hỏng ATM rồi:((, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bank.command(name = "deposit")
-@commands.cooldown(1, 2400, commands.BucketType.user)
+@commands.cooldown(3, 2400, commands.BucketType.user)
 async def deposit(ctx, arg = None):
     if arg == None:
         await ctx.send('nhập số tiền cần bỏ vào tài khoản')
