@@ -67,25 +67,31 @@ async def xsmb(ctx):
 @bot.command()
 async def weather(ctx, *, arg = None):
     url = f'https://api.openweathermap.org/data/2.5/weather?q={arg}&lang=vi&appid=f5e58e5107262dd200ef30cc9e47355a'
+    image = f'http://mewdev.pro/api/v2/weather?location={arg}&apikey=Meew.90c3759fff62c248ba845561583c76fa'
+    get_image = requests.get(image)
     get = requests.get(url)
+    img_txt = get_image.text
     data_txt = get.text
     data_json = json.loads(data_txt)
+    image_json = json.loads(img_txt)
     if arg == None:
         await ctx.send('sai cú pháp')
-    elif data_json['cod'] != "404":
-        url = f'https://api.openweathermap.org/data/2.5/weather?q={arg}&lang=vi&appid=f5e58e5107262dd200ef30cc9e47355a'
-        get = requests.get(url)
-        data_txt = get.text
-        data_json = json.loads(data_txt)
-        temp_min = data_json['main']['temp_min']
-        temp_max = data_json['main']['temp_max']
-        feel_like = data_json['main']['feels_like'] 
+    elif data_json['cod'] != "404" and image_json['success'] == True:
+        img = requests.get(image_json['data'])
+        file = open("weather.png", "wb")
+        file.write(img.content)
+        file.close()
+        temp_min = data_json['main']['temp_min'] - 273.15
+        temp_max = data_json['main']['temp_max'] - 273.15
+        feel_like = data_json['main']['feels_like'] - 273.15
         sunrise = datetime.datetime.fromtimestamp(int(data_json['sys']['sunrise']))
         sunset = datetime.datetime.fromtimestamp(int(data_json['sys']['sunset']))
         description = data_json['weather'][0]['description']      
-        await ctx.send(f'🌡️nhiệt độ cao nhât - thấp nhất: {temp_max} - {temp_min}\n🌡️nhiệt độ cảm nhận được: {feel_like}\n🌅mặt trời mọc: {sunrise}\n🌄mặt trời lặn: {sunset}\n🗄️mô tả: {description}')
+        await ctx.send(f'🌡️nhiệt độ cao nhât - thấp nhất: {temp_max} - {temp_min}\n🌡️nhiệt độ cảm nhận được: {feel_like}\n🌅mặt trời mọc: {sunrise}\n🌄mặt trời lặn: {sunset}\n🗄️mô tả: {description}', file = discord.File('weather.png'))
     else:
-        await ctx.send('thành phố không tồn tại')
+        await ctx.send('thành phố không tồn tại\nhãy thử viết tên thành phố không dấu, cách giữa hai từ\nví dụ: /weather ha noi')
+    print(data_json['cod'])
+    print(image_json['success'])
 @bot.command()
 async def youtube_search(ctx):
     await ctx.send('nhập từ khóa cần tìm kiếm')
@@ -123,21 +129,6 @@ async def play_taixiu(ctx):
         get_taixiu = requests.get(full_url_taixiu)
         data_taixiu = get_taixiu.text
         parse_json = json.loads(data_taixiu)
-        img1_taixiu = parse_json['images'][0]
-        get_img1 = requests.get(img1_taixiu)
-        file = open("taixiu1.png", "wb")
-        file.write(get_img1.content)
-        file.close()
-        img2_taixiu = parse_json['images'][1]
-        get_img2 = requests.get(img1_taixiu)
-        file = open("taixiu2.png", "wb")
-        file.write(get_img2.content)
-        file.close()
-        img3_taixiu = parse_json['images'][2]
-        get_img3 = requests.get(img3_taixiu)
-        file = open("taixiu3.png", "wb")
-        file.write(get_img3.content)
-        file.close()
         if (message.content.lower() == "hd"):
             await ctx.send('luật chơi tài xỉu như sau: \n có 3 cách chơi \n cách 1: cược tài/xỉu. Nếu cược xỉu Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 4 đến 10. Nếu cược tài Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 11 đến 17. \n cách 2: cược chẵn/lẻ. Nếu cược chẵn sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 4,6,8,10,12,14,16. Nếu cược lẻ sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 5,7,9,11,13,15,17. \nLưu ý: nếu muốn out game hãy gõ quit, tiền cược mặc định của game là 200$/lần (ko thể thay đổi tại t lười code phần đấy vl:>)')
         if (message.content.lower() == "tai"):
@@ -459,26 +450,45 @@ async def tiki(ctx):
     await ctx.send('ảnh đây:)', file = discord.File('tiki.png'))
 @bot.command()
 async def dhbc(ctx):
-    url_DHBC = 'https://goatbot.tk/api/duoihinhbatchu'
-    get_DHBC = requests.get(url_DHBC)
+    url_DHBC = ['https://manhict.tech/game/dhbcv3', 'https://goatbot.tk/api/duoihinhbatchu']
+    random = random.choice(url_DHBC)
+    get_DHBC = requests.get(random)
     data_DHBC = get_DHBC.text
     json_DHBC = json.loads(data_DHBC)
-    image_DHBC = json_DHBC['data']['image1and2'] 
-    sokt = json_DHBC['data']['soluongkt']
-    dapan = json_DHBC['data']['wordcomplete']
-    get_image_DHBC = requests.get(image_DHBC)
-    file = open("DHBC.png", "wb")
-    file.write(get_image_DHBC.content)
-    file.close()
-    await ctx.send(f'đây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
-    if "g" in url_DHBC:
-        def check(m):
-            return m.author.id == ctx.author.id
-        message = await bot.wait_for('message', check=check)
-        if str(message.content.upper()) == dapan:
-            await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
-        else:
-            await ctx.send(f'sai rồi, đáp án là {dapan}')
+    if random == 'https://goatbot.tk/api/duoihinhbatchu':
+        image_DHBC = json_DHBC['data']['image1and2'] 
+        sokt = json_DHBC['data']['soluongkt']
+        dapan = json_DHBC['data']['wordcomplete']
+        get_image_DHBC = requests.get(image_DHBC)
+        file = open("DHBC.png", "wb")
+        file.write(get_image_DHBC.content)
+        file.close()
+        await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
+        if "g" in url_DHBC:
+            def check(m):
+                return m.author.id == ctx.author.id
+            message = await bot.wait_for('message', check=check)
+            if str(message.content.upper()) == dapan:
+                await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
+            else:
+                await ctx.send(f'sai rồi, đáp án là {dapan}')
+    else:
+        image_DHBC = json_DHBC['image1and2'] 
+        sokt = json_DHBC['soluongkt']
+        dapan = json_DHBC['wordcomplete']
+        get_image_DHBC = requests.get(image_DHBC)
+        file = open("DHBC.png", "wb")
+        file.write(get_image_DHBC.content)
+        file.close()
+        await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
+        if "m" in url_DHBC:
+            def check(m):
+                return m.author.id == ctx.author.id
+            message = await bot.wait_for('message', check=check)
+            if str(message.content.upper()) == dapan:
+                await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
+            else:
+                await ctx.send(f'sai rồi, đáp án là {dapan}')
 @bot.command()
 async def noitu(ctx):
     await ctx.send('đã bắt đầu, hãy mở đầu trò chơi với một từ đầu tiên')
@@ -615,8 +625,10 @@ async def daily_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('bạn đã nhận thưởng ngày hôm nay rồi hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
-async def test(ctx):
-    pass
+async def avatar(ctx):
+    bg = Image.open("image/white.png")
+    image = await load_image_async(str(ctx.author.avatar_url))
+    image.show()
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -658,5 +670,4 @@ def update(user, change, mode):
         save_member_data(user, member_data)
     else:
         print('error')
-bot.run('token')
-#credit code: Duc Anh 
+bot.run()
