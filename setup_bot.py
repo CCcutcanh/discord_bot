@@ -625,10 +625,33 @@ async def daily_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('bạn đã nhận thưởng ngày hôm nay rồi hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
-async def avatar(ctx):
-    bg = Image.open("image/white.png")
-    image = await load_image_async(str(ctx.author.avatar_url))
-    image.show()
+async def slot(ctx, arg = None):
+    if int(arg) == None:
+        await ctx.send('sai cú pháp')
+    else:
+        url = 'https://manhict.tech/game/slot'
+        get = requests.get(url)
+        data_txt = get.text
+        data = json.loads(data_txt)
+        slot = data['data']
+        if data['result'] == "lose":
+            await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thua! {arg}$')
+            update(ctx.message.author.id, arg, 'keobuabao_lose')
+        elif data['result'] == "win":
+            await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thắng {arg}$')
+            update(ctx.message.author.id, arg, 'keobuabao_win')
+@bot.command()
+async def news(ctx):
+    url = 'https://manhict.tech/news/v1/vnexpress'
+    get = requests.get(url)
+    data = get.text
+    data = json.loads(data)
+    result = data['title']
+    link = data['link']
+    await ctx.send(f'Tin mới: {result}\nLink: {link}')
+@bot.command()
+async def test(ctx):
+    await ctx.send('update...')
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -670,4 +693,5 @@ def update(user, change, mode):
         save_member_data(user, member_data)
     else:
         print('error')
-bot.run()
+bot.run('token')
+#code credit: Duc Anh 
