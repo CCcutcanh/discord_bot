@@ -116,106 +116,28 @@ async def offbot(ctx, m):
 async def ping(ctx):
     await ctx.send('pong!')
 @bot.command()
-async def play_taixiu(ctx):
-    await ctx.send('đã bắt đầu game tài xỉu, nếu không biết luật bạn có thể nhập hd để biết rõ luật chơi và nhập quit để out game')
-    while True:
-        def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and \
-            m.content.lower() in ["hd", "quit", "tai", "xiu", "chan", "le"]
-        message = await bot.wait_for('message', check = check)
-        base_url_taixiu = 'http://manhict.tech/game/v2/taixiu?method='
-        api_key_taixiu = '&apikey=KeyTest'
-        full_url_taixiu = base_url_taixiu + str(message.content.lower()) + api_key_taixiu
-        get_taixiu = requests.get(full_url_taixiu)
-        data_taixiu = get_taixiu.text
-        parse_json = json.loads(data_taixiu)
-        if (message.content.lower() == "hd"):
-            await ctx.send('luật chơi tài xỉu như sau: \n có 3 cách chơi \n cách 1: cược tài/xỉu. Nếu cược xỉu Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 4 đến 10. Nếu cược tài Sẽ thắng cược khi tổng số điểm của 3 xúc xắc là từ 11 đến 17. \n cách 2: cược chẵn/lẻ. Nếu cược chẵn sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 4,6,8,10,12,14,16. Nếu cược lẻ sẽ thắng cược khi tổng số điểm của 3 xúc xắc là 5,7,9,11,13,15,17. \nLưu ý: nếu muốn out game hãy gõ quit, tiền cược mặc định của game là 200$/lần (ko thể thay đổi tại t lười code phần đấy vl:>)')
-        if (message.content.lower() == "tai"):
-            bat1 = parse_json['mở bát']['one']
-            bat2 = parse_json['mở bát']['two']
-            bat3 = parse_json['mở bát']['three']
-            tong = parse_json['người chơi']['chất']
-            nha_cai = parse_json['nhà cái']
-            nha_cai_ra = parse_json['mở bát']['total']
-            chat = parse_json['người chơi']['chất']
-            ketqua = parse_json['ketqua']['total']
-            result_taixiu_tai = """nhà cái ra {nha_cai_ra} ({nha_cai}), bạn chọn {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua), nha_cai_ra = str(nha_cai_ra))
-            member_data = load_member_data(message.author.id)
-            if ("lose" in result_taixiu_tai):
-                    await ctx.send(result_taixiu_tai.replace("lose", "đã thua 200$"))
-                    member_data.wallet -= 200
-                    save_member_data(message.author.id, member_data)
-                    print(result_taixiu_tai)
-            elif ("win" in result_taixiu_tai):
-                await ctx.send(result_taixiu_tai.replace("win", "đã thắng 200$"))
-                member_data.wallet += 200
-                save_member_data(message.author.id, member_data)
-                print(result_taixiu_tai)
-        elif (message.content.lower() == "xiu"):
-            bat1 = parse_json['mở bát']['one']
-            bat2 = parse_json['mở bát']['two']
-            bat3 = parse_json['mở bát']['three']
-            tong = parse_json['người chơi']['chất']
-            nha_cai = parse_json['nhà cái']
-            nha_cai_ra = parse_json['mở bát']['total']
-            chat = parse_json['người chơi']['chất']
-            ketqua = parse_json['ketqua']['total']
-            result_taixiu_xiu = """nhà cái ra {nha_cai_ra} ({nha_cai}), bạn chọn {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua), nha_cai_ra = str(nha_cai_ra))
-            if ("lose" in result_taixiu_xiu):
-                    await ctx.send(result_taixiu_xiu.replace("lose", "đã thua 200$"), file = discord.File('taixiu1.png'))
-                    await ctx.send()
-                    member_data.wallet -= 200
-                    save_member_data(message.author.id, member_data)
-                    print(result_taixiu_xiu)
-            elif ("win" in result_taixiu_xiu):
-                await ctx.send(result_taixiu_xiu.replace("win", "đã thắng 200$"))
-                member_data.wallet += 200
-                save_member_data(message.author.id, member_data)
-                print(result_taixiu_xiu)
-        elif (message.content.lower() == "chan"):
-            bat1 = parse_json['mở bát']['one']
-            bat2 = parse_json['mở bát']['two']
-            bat3 = parse_json['mở bát']['three']
-            tong = parse_json['người chơi']['chất']
-            nha_cai = parse_json['nhà cái']
-            chat = parse_json['mở bát']['total']
-            ketqua = parse_json['ketqua']['total']
-            result_taixiu_chan = """nhà cái ra {chat} ({nha_cai}) bạn cược {tong} . Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua))
-            if ("lose" in result_taixiu_chan):
-                    await ctx.send(result_taixiu_chan.replace("lose", "đã thua 200$"))
-                    member_data.wallet -= 200
-                    save_member_data(message.author.id, member_data)
-                    print(result_taixiu_chan)
-            elif ("win" in result_taixiu_chan):
-                await ctx.send(result_taixiu_chan.replace("win", "đã thắng 200$"))
-                member_data.wallet += 200
-                save_member_data(message.author.id, member_data)
-                print(result_taixiu_chan)
-        elif (message.content.lower() == "le"):
-            bat1 = parse_json['mở bát']['one']
-            bat2 = parse_json['mở bát']['two']
-            bat3 = parse_json['mở bát']['three']
-            tong = parse_json['người chơi']['chất']
-            nha_cai = parse_json['nhà cái']
-            chat = parse_json['mở bát']['total']
-            ketqua = parse_json['ketqua']['total']
-            result_taixiu_le = """nhà cái ra {chat} ({nha_cai}) bạn cược {tong}. Bạn {ketqua}""".format(nha_cai = str(nha_cai), tong = str(tong), chat = str(chat), ketqua = str(ketqua))
-            if ("lose" in result_taixiu_le):
-                    await ctx.send(result_taixiu_le.replace("lose", "đã thua 200$"))
-                    member_data.wallet -= 200
-                    save_member_data(message.author.id, member_data)
-                    print(result_taixiu_le)
-            elif ("win" in result_taixiu_le):
-                await ctx.send(result_taixiu_le.replace("win", "đã thắng 200$"))
-                member_data.wallet += 200
-                save_member_data(message.author.id, member_data)
-                print(result_taixiu_le)
-        elif (message.content.lower() == "quit"):
-            await ctx.send("-----------------------------end game-----------------------------")
-            break
-        else:
-            await ctx.send("cú pháp không hợp lệ, vui lòng gõ lại")
+async def play_taixiu(ctx, arg1 = None, arg2 = None):
+    url = 'https://api.hclaptrinh.repl.co/api/taixiu'
+    get = requests.get(url)
+    data_txt = get.text
+    data_json = json.loads(data_txt)
+    result = data_json['result']
+    if result == 'xiu':
+        result = 'xỉu'
+    elif result == 'tai':
+        result = 'tài'
+    if arg1 == None:
+        await ctx.send('hãy cược tài hoặc xỉu')
+    elif arg2 == None or int(arg2) <= 50:
+        await ctx.send('số tiền cược không cược để trống và phải lớn hơn 50$')
+    elif arg1 == result:
+        await ctx.send(f'bạn đã thắng kết quả là: {result} và gom về được {arg2}$ tiền thưởng')
+        update(ctx.message.author.id, arg2, 'keobuabao_win')
+    elif arg1 != result:
+        await ctx.send(f'bạn đã thua, kết quả là: {result} và mất {arg2}$ tiền cược')
+        update(ctx.message.author.id, arg2, 'keobuabao_lose')
+    else:
+        await ctx.send('lỗi')
 @bot.command()
 async def dovui(ctx):
     url_dovui = 'http://manhict.tech/game/dovuiv1'
@@ -601,7 +523,7 @@ async def callad(ctx, *, arg=None):
     await ctx.send('đã báo cáo về admin thành công')
 @bot.command()
 async def sendnoti(ctx):
-    await ctx.send('nhập theo mẫu sau:\n<id channel> | phản hồi user | phản hồi channel')
+    await ctx.send('nhập theo mẫu sau:\n<id channel> | phản hồi user | phản hồi channel | <id user>')
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check=check)
@@ -609,8 +531,9 @@ async def sendnoti(ctx):
     id_channel = str(value[0])
     reply_user = str(value[1])
     reply_channel = str(value[2])
+    id_user = str(value[3])
     channel = await bot.fetch_channel(id_channel)
-    user = await bot.fetch_user(f"{ctx.message.author.id}")
+    user = await bot.fetch_user(f"{id_user}")
     await user.send(f'cảm ơn bạn về đóng góp, sau đây là phản hồi của admin:\n{reply_user}')
     await channel.send(f'phản hồi từ admin đến kênh:\nnội dung: {reply_channel}')
 @bot.command()
@@ -649,9 +572,7 @@ async def news(ctx):
     result = data['title']
     link = data['link']
     await ctx.send(f'Tin mới: {result}\nLink: {link}')
-@bot.command()
-async def test(ctx):
-    await ctx.send('update...')
+
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -694,4 +615,4 @@ def update(user, change, mode):
     else:
         print('error')
 bot.run('token')
-#code credit: Duc Anh 
+#credit code: Duc Anh
