@@ -15,6 +15,7 @@ import asyncio
 import wikipedia
 import datetime
 import time
+from bs4 import BeautifulSoup
 bot = commands.Bot(command_prefix='/') 
 bot.remove_command("help")
 data_filename = "data.pickle"
@@ -386,7 +387,7 @@ async def dhbc(ctx):
         file.write(get_image_DHBC.content)
         file.close()
         await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
-        if "g" in url_DHBC:
+        if "g" in random:
             def check(m):
                 return m.author.id == ctx.author.id
             message = await bot.wait_for('message', check=check)
@@ -565,13 +566,19 @@ async def slot(ctx, arg = None):
             update(ctx.message.author.id, arg, 'keobuabao_win')
 @bot.command()
 async def news(ctx):
-    url = 'https://manhict.tech/news/v1/vnexpress'
-    get = requests.get(url)
-    data = get.text
-    data = json.loads(data)
-    result = data['title']
-    link = data['link']
-    await ctx.send(f'Tin mới: {result}\nLink: {link}')
+    get = requests.get('https://vnexpress.net/')
+    soup = BeautifulSoup( get.content , 'html.parser')
+    results = []
+    dess = []
+    for result in soup.find_all(class_ = 'title-news'):
+        results.append(result.text)
+        results.append(result.a.get('href'))
+    for des in soup.find_all(class_ = 'description'):
+        dess.append(des.text)
+    title = results[0]
+    link = results[1]
+    des = dess[1]
+    await ctx.send(f'tin mới nhất hôm nay: {title}{des}\nlink: {link}')
 
 #Functions
 def load_data():
@@ -615,4 +622,4 @@ def update(user, change, mode):
     else:
         print('error')
 bot.run('token')
-#credit code: Duc Anh
+#credit: Duc Anh
