@@ -693,5 +693,5 @@ def update(user, change, mode):
         save_member_data(user, member_data)
     else:
         print('error')
-bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.Gi4N02.0egIe9v5fFJs4J6mKtq7A55Bk90nnHFd9kozyw')
+bot.run('token')
 #credit: Duc Anh
