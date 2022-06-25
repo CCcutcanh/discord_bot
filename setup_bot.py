@@ -4,10 +4,8 @@ import json
 import os
 import requests
 from youtube_search import YoutubeSearch
-from PIL import *
 import random
 import pickle
-import youtube_dl
 import os
 import random
 from googletrans import Translator
@@ -27,7 +25,6 @@ async def help(ctx):
     em.add_field(name = "role play command", value = "balance, bank, shop, work")
     em.add_field(name = "default command bot", value = "help, offbot, ping")
     em.add_field(name = "fun command", value = "thinh, mark, tiki, taoanhdep, shopmaihuong")
-
     await ctx.send(embed = em)
 class Data:
     def __init__(self, wallet, bank, pc):
@@ -42,7 +39,7 @@ async def on_ready():
 #covid19
 @bot.command()
 async def covid19(ctx):
-    full_url = 'http://manhict.tech/covid?country=viet%20nam'
+    full_url = 'https://api.phamvandien.xyz/covid?country=viet%20nam'
     get = requests.get(full_url)
     data = get.text
     parse_json = json.loads(data)
@@ -52,7 +49,7 @@ async def covid19(ctx):
     data4 = parse_json['data']['hoiphuc']
     data5 = parse_json['data']['total']
     data6 = parse_json['data']['tong_ca_tu_vong']
-    result = """thông tin về dịch bệnh covid 19 tại Việt Nam như sau: dân số {data1} \nngười tổng số ca nhiễm: {data5} \nsố ca đang điều trị {data2} ca \nsố bệnh nhân đã khỏi bệnh: {data4} bệnh nhân \nca nhiễm mới: {data3} \ntổng số ca dã tử vong: {data6}""".format(data1 = str(data1), data2 = str(data2), data3 = str(data3), data4 = str(data4), data5 = str(data5), data6 = str(data6))
+    result = """thông tin về dịch bệnh covid 19 tại Việt Nam như sau: dân số {data1} người\ntổng số ca nhiễm: {data5} \nsố ca đang điều trị {data2} ca \nsố bệnh nhân đã khỏi bệnh: {data4} bệnh nhân \nca nhiễm mới: {data3} \ntổng số ca dã tử vong: {data6}""".format(data1 = str(data1), data2 = str(data2), data3 = str(data3), data4 = str(data4), data5 = str(data5), data6 = str(data6))
     await ctx.send(result)
 #xsmb
 @bot.command()
@@ -118,27 +115,47 @@ async def ping(ctx):
     await ctx.send('pong!')
 @bot.command()
 async def play_taixiu(ctx, arg1 = None, arg2 = None):
-    url = 'https://api.hclaptrinh.repl.co/api/taixiu'
-    get = requests.get(url)
-    data_txt = get.text
-    data_json = json.loads(data_txt)
-    result = data_json['result']
-    if result == 'xiu':
-        result = 'xỉu'
-    elif result == 'tai':
-        result = 'tài'
-    if arg1 == None:
-        await ctx.send('hãy cược tài hoặc xỉu')
-    elif arg2 == None or int(arg2) <= 50:
-        await ctx.send('số tiền cược không cược để trống và phải lớn hơn 50$')
-    elif arg1 == result:
-        await ctx.send(f'bạn đã thắng kết quả là: {result} và gom về được {arg2}$ tiền thưởng')
-        update(ctx.message.author.id, arg2, 'keobuabao_win')
-    elif arg1 != result:
-        await ctx.send(f'bạn đã thua, kết quả là: {result} và mất {arg2}$ tiền cược')
-        update(ctx.message.author.id, arg2, 'keobuabao_lose')
-    else:
-        await ctx.send('lỗi')
+    try:
+        url = 'https://api.hclaptrinh.repl.co/api/taixiu'
+        get = requests.get(url)
+        data_txt = get.text
+        data_json = json.loads(data_txt)
+        result = data_json['result']
+        if result == 'xiu':
+            result = 'xỉu'
+        elif result == 'tai':
+            result = 'tài'
+        if arg1 == None:
+            await ctx.send('hãy cược tài hoặc xỉu')
+        elif arg2 == None or int(arg2) <= 50:
+            await ctx.send('số tiền cược không cược để trống và phải lớn hơn 50$')
+        elif arg1 == result:
+            gif = 'https://media1.giphy.com/media/ckHAdLU2OmY7knUClD/giphy.gif?cid=ecf05e47venaa45nhe4pmfsckgtrjasrpdzs6vtmpvwya6fk&rid=giphy.gif&ct=g'
+            gif2 = 'https://media1.giphy.com/media/g9582DNuQppxC/giphy.gif?cid=ecf05e4743jop5ctofl2a5763ih04tc5b91dfnor287cu5tv&rid=giphy.gif&ct=g'
+            em_load = discord.Embed(colour = ctx.author.color, description = 'lắc xúc sắc...')
+            em_load.set_image(url = gif)
+            em_win = discord.Embed(colour = ctx.author.color, description = f'bạn đã thắng kết quả là: {result} và gom về được {arg2}$ tiền thưởng')
+            em_win.set_image(url = gif2)
+            await ctx.send(embed = em_load)
+            await asyncio.sleep(3)
+            await ctx.send(embed = em_win)
+            update(ctx.message.author.id, arg2, 'keobuabao_win')
+        elif arg1 != result:
+            gif = 'https://media1.giphy.com/media/ckHAdLU2OmY7knUClD/giphy.gif?cid=ecf05e47venaa45nhe4pmfsckgtrjasrpdzs6vtmpvwya6fk&rid=giphy.gif&ct=g'
+            gif2 = 'https://media1.giphy.com/media/g9582DNuQppxC/giphy.gif?cid=ecf05e4743jop5ctofl2a5763ih04tc5b91dfnor287cu5tv&rid=giphy.gif&ct=g'
+            em_load = discord.Embed(colour = ctx.author.color, description = 'lắc xúc sắc...')
+            em_load.set_image(url = gif)
+            em_win = discord.Embed(colour = ctx.author.color, description = f'bạn đã thua, kết quả là: {result} và mất {arg2}$ tiền cược')
+            em_win.set_image(url = gif2)
+            await ctx.send(embed = em_load)
+            await asyncio.sleep(3)
+            await ctx.send(embed = em_win)
+            update(ctx.message.author.id, arg2, 'keobuabao_lose')
+        else:
+            await ctx.send('lỗi')
+    except Exception as e:
+        print(e)
+        await ctx.send('error')
 @bot.command()
 async def dovui(ctx):
     url_dovui = 'http://manhict.tech/game/dovuiv1'
@@ -209,7 +226,6 @@ async def work_error(ctx, error):
 @bot.command()
 async def balance(message):
     member_data = load_member_data(message.author.id)
-
     embed = discord.Embed(title=f"số tiền của {message.author.display_name}")
     embed.add_field(name="tiền mặt", value=str(member_data.wallet))
     embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
@@ -328,36 +344,42 @@ async def keobuabao(ctx, arg1 = None, arg2 = None):
         await ctx.send('lỗi')
 @bot.command()
 async def vuatiengviet(ctx):
-    url_vuatiengviet = 'http://manhict.tech/vuatiengviet/image?word='
-    word_vuatiengviet = ["tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ", "nông nghiệp", "băng hà", "hiếu động", "sung sức", "công lao", "tâm tình", "cờ bạc"]
-    random_word_vuatiengviet = random.choice(word_vuatiengviet)
-    full_url_vuatiengviet = url_vuatiengviet + random_word_vuatiengviet
-    get_vuatiengviet = requests.get(full_url_vuatiengviet)
-    file = open("vuatiengviet.png", "wb")
-    file.write(get_vuatiengviet.content)
-    file.close()
-    await ctx.send('đây là câu hỏi của bạn', file = discord.File('vuatiengviet.png'))
-    if " " in random_word_vuatiengviet:
+    try: 
+        url_vuatiengviet = 'https://api.phamvandien.xyz/vuatiengviet/image?word='
+        word_vuatiengviet = ["tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ", "nông nghiệp", "băng hà", "hiếu động", "sung sức", "công lao", "tâm tình", "cờ bạc", "ngu ngốc"]
+        random_word_vuatiengviet = random.choice(word_vuatiengviet)
+        full_url_vuatiengviet = url_vuatiengviet + random_word_vuatiengviet
+        get_vuatiengviet = requests.get(full_url_vuatiengviet)
+        file = open("vuatiengviet.png", "wb")
+        file.write(get_vuatiengviet.content)
+        file.close()
+        await ctx.send('đây là câu hỏi của bạn', file = discord.File('vuatiengviet.png'))
+        if " " in random_word_vuatiengviet:
+            def check(m):
+                return m.author.id == ctx.author.id
+            message = await bot.wait_for('message', check=check)
+            if message.content == random_word_vuatiengviet:
+                await ctx.send(f'bạn đã trả lời đúng, đáp án là "{random_word_vuatiengviet}"')
+            else:
+                await ctx.send(f'sai rồi đáp án là "{random_word_vuatiengviet}"')
+    except:
+        await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
+@bot.command()
+async def mark(ctx):
+    try:
+        await ctx.send('nhập điều bạn muốn ghi')
         def check(m):
             return m.author.id == ctx.author.id
         message = await bot.wait_for('message', check=check)
-        if message.content == random_word_vuatiengviet:
-            await ctx.send(f'bạn đã trả lời đúng, đáp án là "{random_word_vuatiengviet}"')
-        else:
-            await ctx.send(f'sai rồi đáp án là "{random_word_vuatiengviet}"')
-@bot.command()
-async def mark(ctx):
-    await ctx.send('nhập điều bạn muốn ghi')
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check=check)
-    url_mark = 'http://manhict.tech/markcmt?text='
-    full_url_mark = url_mark + str(message.content)
-    get_mark = requests.get(full_url_mark)
-    file = open("mark.png", "wb")
-    file.write(get_mark.content)
-    file.close()
-    await ctx.send('ảnh đây:)', file = discord.File('mark.png'))
+        url_mark = 'http://manhict.tech/markcmt?text='
+        full_url_mark = url_mark + str(message.content)
+        get_mark = requests.get(full_url_mark)
+        file = open("mark.png", "wb")
+        file.write(get_mark.content)
+        file.close()
+        await ctx.send('ảnh đây:)', file = discord.File('mark.png'))
+    except:
+        await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
 @bot.command()
 async def tiki(ctx):
     await ctx.send('nhập tên bạn vào đây (không nên để dấu)')
@@ -373,45 +395,67 @@ async def tiki(ctx):
     await ctx.send('ảnh đây:)', file = discord.File('tiki.png'))
 @bot.command()
 async def dhbc(ctx):
-    url_DHBC = ['https://manhict.tech/game/dhbcv3', 'https://goatbot.tk/api/duoihinhbatchu']
-    random = random.choice(url_DHBC)
-    get_DHBC = requests.get(random)
-    data_DHBC = get_DHBC.text
-    json_DHBC = json.loads(data_DHBC)
-    if random == 'https://goatbot.tk/api/duoihinhbatchu':
-        image_DHBC = json_DHBC['data']['image1and2'] 
-        sokt = json_DHBC['data']['soluongkt']
-        dapan = json_DHBC['data']['wordcomplete']
-        get_image_DHBC = requests.get(image_DHBC)
-        file = open("DHBC.png", "wb")
-        file.write(get_image_DHBC.content)
-        file.close()
-        await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
-        if "g" in random:
-            def check(m):
-                return m.author.id == ctx.author.id
-            message = await bot.wait_for('message', check=check)
-            if str(message.content.upper()) == dapan:
-                await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
-            else:
-                await ctx.send(f'sai rồi, đáp án là {dapan}')
-    else:
-        image_DHBC = json_DHBC['image1and2'] 
-        sokt = json_DHBC['soluongkt']
-        dapan = json_DHBC['wordcomplete']
-        get_image_DHBC = requests.get(image_DHBC)
-        file = open("DHBC.png", "wb")
-        file.write(get_image_DHBC.content)
-        file.close()
-        await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
-        if "m" in url_DHBC:
-            def check(m):
-                return m.author.id == ctx.author.id
-            message = await bot.wait_for('message', check=check)
-            if str(message.content.upper()) == dapan:
-                await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
-            else:
-                await ctx.send(f'sai rồi, đáp án là {dapan}')
+    global random
+    try:
+        url_DHBC = ['https://goatbot.tk/api/duoihinhbatchu', 'https://api.phamvandien.xyz/game/dhbcv1', 'https://www.nguyenmanh.name.vn/api/dhbc1?apikey=rcwGtaxg']
+        random_dhbc = random.choice(url_DHBC)
+        get_DHBC = requests.get(random_dhbc)
+        data_DHBC = get_DHBC.text
+        json_DHBC = json.loads(data_DHBC)
+        if random_dhbc == 'https://goatbot.tk/api/duoihinhbatchu':
+            image_DHBC = json_DHBC['data']['image1and2'] 
+            sokt = json_DHBC['data']['soluongkt']
+            dapan = json_DHBC['data']['wordcomplete']
+            get_image_DHBC = requests.get(image_DHBC)
+            file = open("DHBC.png", "wb")
+            file.write(get_image_DHBC.content)
+            file.close()
+            await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
+            if "g" in random_dhbc:
+                def check(m):
+                    return m.author.id == ctx.author.id
+                message = await bot.wait_for('message', check=check)
+                if str(message.content.upper()) == dapan:
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
+                else:
+                    await ctx.send(f'sai rồi, đáp án là {dapan}')
+        elif random_dhbc == 'https://api.phamvandien.xyz/game/dhbcv1':
+            image_DHBC = json_DHBC['dataGame']['link'] 
+            sokt = json_DHBC['dataGame']['sokitu']
+            dapan = json_DHBC['dataGame']['tukhoa']
+            get_image_DHBC = requests.get(image_DHBC)
+            file = open("DHBC.png", "wb")
+            file.write(get_image_DHBC.content)
+            file.close()
+            await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này là {sokt}', file = discord.File('DHBC.png'))
+            if "a" in random_dhbc:
+                def check(m):
+                    return m.author.id == ctx.author.id
+                message = await bot.wait_for('message', check=check)
+                if str(message.content.lower()) == dapan:
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
+                else:
+                    await ctx.send(f'sai rồi, đáp án là {dapan}')
+        elif random_dhbc == 'https://www.nguyenmanh.name.vn/api/dhbc1?apikey=rcwGtaxg':
+            image_DHBC = json_DHBC['result']['link'] 
+            sokt = json_DHBC['result']['sokitu']
+            dapan = json_DHBC['result']['tukhoa']
+            get_image_DHBC = requests.get(image_DHBC)
+            file = open("DHBC.png", "wb")
+            file.write(get_image_DHBC.content)
+            file.close()
+            await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này là {sokt}', file = discord.File('DHBC.png'))
+            if "a" in random_dhbc:
+                def check(m):
+                    return m.author.id == ctx.author.id
+                message = await bot.wait_for('message', check=check)
+                if str(message.content.lower()) == dapan:
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
+                else:
+                    await ctx.send(f'sai rồi, đáp án là {dapan}')
+    except Exception as e:
+        print(e)
+        await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
 @bot.command()
 async def noitu(ctx):
     await ctx.send('đã bắt đầu, hãy mở đầu trò chơi với một từ đầu tiên')
@@ -462,53 +506,78 @@ async def translate(ctx):
     await ctx.send(translated.text)
 @bot.command()
 async def caunoihay(ctx):
-    sentence = ['Một cách để tận dụng tối đa cuộc sống là xem nó như một cuộc phiêu lưu – William Feather',' Mạnh dạn nói Tôi đã sai là cách ta chấp nhận đối mặt với tình huống khó khăn. Việc đó có phần mạo hiểm nhưng những gì ta nhận được sẽ vượt ngoài sự mong đợi’ - Rich DeVos', 'Tích cực, tự tin và kiên trì là chìa khóa trong cuộc sống. Vì vậy đừng bao giờ từ bỏ chính mình’ – Khalid', 'Yêu tôi hay ghét tôi, cả hai đều có lợi cho tôi. Nếu bạn yêu tôi, tôi sẽ luôn ở trong tim bạn và nếu bạn ghét tôi, tôi sẽ ở trong tâm trí bạn’ – Baland Quandeel', 'Thái độ quan trọng hơn quá khứ, hơn giáo dục, hơn tiền bạc, hơn hoàn cảnh, hơn những gì mọi người làm hoặc nói. Nó quan trọng hơn ngoại hình, năng khiếu hay kỹ năng’ – Charles Swindoll', 'Hãy tin vào chính mình! Có niềm tin vào khả năng của bạn! Nếu không có sự tự tin khiêm tốn nhưng hợp lý vào năng lực của chính mình, bạn không thể thành công hay hạnh phúc’ - Norman Vincent Peale', 'Trong đời người, có hai con đường bằng phẳng không trở ngại: Một là đi tới lý tưởng, một là đi tới cái chết’ - Lev Tolstoy', 'Bạn có thể thay đổi thế giới của mình bằng cách thay đổi lời nói của bạn ... Hãy nhớ rằng, cái chết và sự sống nằm trong sức mạnh của lưỡi’ - Joel Osteen', 'Lạc quan là niềm tin dẫn đến thành tích. Không có gì có thể được thực hiện mà không có hy vọng và sự tự tin’ - Helen Keller']
+    sentence = ['Một cách để tận dụng tối đa cuộc sống là xem nó như một cuộc phiêu lưu – William Feather',' Mạnh dạn nói Tôi đã sai là cách ta chấp nhận đối mặt với tình huống khó khăn. Việc đó có phần mạo hiểm nhưng những gì ta nhận được sẽ vượt ngoài sự mong đợi’ - Rich DeVos', 'Tích cực, tự tin và kiên trì là chìa khóa trong cuộc sống. Vì vậy đừng bao giờ từ bỏ chính mình’ – Khalid', 'Yêu tôi hay ghét tôi, cả hai đều có lợi cho tôi. Nếu bạn yêu tôi, tôi sẽ luôn ở trong tim bạn và nếu bạn ghét tôi, tôi sẽ ở trong tâm trí bạn’ – Baland Quandeel', 'Thái độ quan trọng hơn quá khứ, hơn giáo dục, hơn tiền bạc, hơn hoàn cảnh, hơn những gì mọi người làm hoặc nói. Nó quan trọng hơn ngoại hình, năng khiếu hay kỹ năng’ – Charles Swindoll', 'Hãy tin vào chính mình! Có niềm tin vào khả năng của bạn! Nếu không có sự tự tin khiêm tốn nhưng hợp lý vào năng lực của chính mình, bạn không thể thành công hay hạnh phúc’ - Norman Vincent Peale', 'Trong đời người, có hai con đường bằng phẳng không trở ngại: Một là đi tới lý tưởng, một là đi tới cái chết’ - Lev Tolstoy', 'Bạn có thể thay đổi thế giới của mình bằng cách thay đổi lời nói của bạn ... Hãy nhớ rằng, cái chết và sự sống nằm trong sức mạnh của lưỡi’ - Joel Osteen', 'Lạc quan là niềm tin dẫn đến thành tích. Không có gì có thể được thực hiện mà không có hy vọng và sự tự tin’ - Helen Keller', '‘Nếu bạn muốn thành công, bạn nên tìm ra những con đường mới, thay vì đi trên những con đường mòn của sự thành công được chấp nhận’ - John D. Rockefeller', '‘Nếu bạn không thích cái gì đó, hãy thay đổi nó. Nếu bạn không thể thay đổi nó, hãy thay đổi thái độ của bạn’ - Maya Angelou']
     result_sentence = random.choice(sentence)
     await ctx.send(result_sentence)
 @bot.command()
 async def thayboi(ctx):
-    base_url_thayboi = 'http://manhict.tech/other/thayboi'
-    get_thayboi = requests.get(base_url_thayboi)
-    data_thayboi = get_thayboi.text 
-    json_thayboi = json.loads(data_thayboi)
-    result_thayboi = json_thayboi['data']
-    await ctx.send(result_thayboi)
+    random_card = ['con bốc được lá ♥️, Cơ là nước bài màu đỏ, được thể hiện bằng hình vẽ tim sẽ cho bạn những dự đoán trong chuyện tình cảm, hôn nhân vợ chồng, gia đình nói chung… Vận lá bài nước Cơ hên hay xui, may hay rủi còn phụ thuộc vào những con số của chúng.', 'con bốc được lá ♦️, là nước bài nổi bật với hình vẽ tượng trưng tựa như hình thoi dựng đứng, con Rô là dự báo tốt về đường công danh, sự nghiệp vững vàng, sự sung túc về tiền bạc.', 'con bốc được lá ♣️. Trong hình tượng như cái cây mang màu đen, nước Chuồn mang theo sự tốt lành về nhân duyên, tiền bạc, sự nghiệp, cuộc sống… Tóm lại, nước Chuồn báo hiệu sự viên mãn của đời người. Vì vậy nên trong ngôn ngữ của bói bài, người ta hay nói: “Có Chuồn là có tiền"', 'con bốc được lá ♠️. Đây có lẽ là nước bài không được trông chờ nhất trong các quân bài Tây vì ý nghĩa của nó mang lại thật sự không tốt. Người có quân bài nước này thường gặp những vướng mắc và khó khăn khó giải quyết ở nhiều phương diện.\nCon người: hay ốm đau, bệnh vặt, phải vươn lên trong vất vả.\nSự nghiệp công danh: khó thăng tiến, luôn gặp trắc trở, vật cản…\nTình duyên: lận đận, gãy gánh, chia cắt…']
+    result =  random.choice(random_card)
+    await ctx.send(result)
 @bot.group(invoke_without_command=True)
-async def truyentranh24(ctx):
-    await ctx.send('tìm truyện trên truyentranh24.com\n/truyentranh24 search')
-@truyentranh24.command()
-async def search(ctx):
-    await ctx.send('nhập tên truyện cần tìm')
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check=check)
-    full_url_search = 'https://goatbot.tk/truyentranh24/search?q=' + str(message.content.lower()) + '&apikey=ntkhang'
-    get_search = requests.get(full_url_search)
-    json = get_search.json()
-    name = json['data'][0]['name']
-    img = json['data'][0]['thumbnail']
-    get_img = requests.get(img)
-    file = open("truyentranh24.png", "wb")
-    file.write(get_img.content)
-    file.close()
-    href = json['data'][0]['href']  
-    result = str(name) + '\n' + 'href: ' + str(href) + ' (dùng khi sử dụng lệnh đọc tryện)'
-    await ctx.send(result, file = discord.File('truyentranh24.png'))
+async def truyentranh(ctx):
+    await ctx.send('đọc, tìm, xem các truyện mới ra trên truyentranh24.com và toptruyen\nsử dụng: /truyentranh search <keyword> (tìm kiếm truyện)\ntruyentranh news (các truyện mới nhất truyên toptruyen)')
+@truyentranh.command()
+async def search(ctx, *, arg = None):
+    if arg == None:
+        await ctx.send('phần tìm kiếm truyện không được để trống')
+    else:
+        full_url_search = 'https://goatbot.tk/truyentranh24/search?q=' + str(arg) + '&apikey=ntkhang'
+        get_search = requests.get(full_url_search)
+        json = get_search.json()
+        name = json['data'][0]['name']
+        img = json['data'][0]['thumbnail']
+        get_img = requests.get(img)
+        file = open("truyentranh.png", "wb")
+        file.write(get_img.content)
+        file.close()
+        href = json['data'][0]['href']  
+        result = str(name) + '\n' + 'href: ' + str(href)
+        await ctx.send(result, file = discord.File('truyentranh.png'))
+@truyentranh.command()
+async def news(ctx):
+    try:
+        full_url = 'https://thieutrungkien.up.railway.app/toptruyen/'
+        get = requests.get(full_url)
+        data_txt = get.text
+        data_json = json.loads(data_txt)
+        truyen1_name = data_json['data'][0]['name']
+        truyen1_link = data_json['data'][0]['url']
+        truyen2_name = data_json['data'][1]['name']
+        truyen2_link = data_json['data'][1]['url']
+        truyen3_name = data_json['data'][2]['name']
+        truyen3_link = data_json['data'][2]['url']
+        truyen4_name = data_json['data'][3]['name']
+        truyen4_link = data_json['data'][3]['url']
+        truyen5_name = data_json['data'][4]['name']
+        truyen5_link = data_json['data'][4]['url']
+        truyen1_image = data_json['data'][0]['images']
+        get_img = requests.get(truyen1_image)
+        file = open("truyentranh.png", "wb")
+        file.write(get_img.content)
+        file.close()
+        await ctx.send(f'top 5 các truyện mới nhất trên toptruyen.net\n\n**{truyen1_name}**\nlink: {truyen1_link}\n\n**{truyen2_name}**\nlink: {truyen2_link}\n\n**{truyen3_name}\nlink: {truyen3_link}**\n\n**{truyen4_name}**\nlink: {truyen4_link}\n\n**{truyen5_name}**\nlink: {truyen5_link}',file = discord.File('truyentranh.png'))
+    except Exception as e:
+        print(e)
+        await ctx.send('error')
 @bot.command()
 async def shopmaihuong(ctx):
-    await ctx.send('nhập tin nhắn để tạo ảnh theo mẫu sau:\ntext1 | text2')
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check=check)
-    value = message.content.lower().split(" | ")
-    text1 = str(value[0])
-    text2 = str(value[1])
-    url = 'https://manhict.tech/shopmaihuong?text1=' + text1 + "&text2=" + text2
-    get = requests.get(url)
-    file = open("shopmaihuong.png", "wb")
-    file.write(get.content)
-    file.close()
-    await ctx.send('ảnh của bạn đây:)', file = discord.File('shopmaihuong.png'))
+    try:
+        await ctx.send('nhập tin nhắn để tạo ảnh theo mẫu sau:\ntext1 | text2')
+        def check(m):
+            return m.author.id == ctx.author.id
+        message = await bot.wait_for('message', check=check)
+        value = message.content.lower().split(" | ")
+        text1 = str(value[0])
+        text2 = str(value[1])
+        url = 'https://manhict.tech/shopmaihuong?text1=' + text1 + "&text2=" + text2
+        get = requests.get(url)
+        file = open("shopmaihuong.png", "wb")
+        file.write(get.content)
+        file.close()
+        await ctx.send('ảnh của bạn đây:)', file = discord.File('shopmaihuong.png'))
+    except:
+        await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
 @bot.command()
 async def wiki(ctx, *, arg = None):
     if arg == None:
@@ -550,20 +619,23 @@ async def daily_error(ctx, error):
         await ctx.send('bạn đã nhận thưởng ngày hôm nay rồi hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
 async def slot(ctx, arg = None):
-    if int(arg) == None:
-        await ctx.send('sai cú pháp')
-    else:
-        url = 'https://manhict.tech/game/slot'
-        get = requests.get(url)
-        data_txt = get.text
-        data = json.loads(data_txt)
-        slot = data['data']
-        if data['result'] == "lose":
-            await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thua! {arg}$')
-            update(ctx.message.author.id, arg, 'keobuabao_lose')
-        elif data['result'] == "win":
-            await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thắng {arg}$')
-            update(ctx.message.author.id, arg, 'keobuabao_win')
+    try:
+        if int(arg) == None:
+            await ctx.send('sai cú pháp')
+        else:
+            url = 'https://manhict.tech/game/slot'
+            get = requests.get(url)
+            data_txt = get.text
+            data = json.loads(data_txt)
+            slot = data['data']
+            if data['result'] == "lose":
+                await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thua! {arg}$')
+                update(ctx.message.author.id, arg, 'keobuabao_lose')
+            elif data['result'] == "win":
+                await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thắng {arg}$')
+                update(ctx.message.author.id, arg, 'keobuabao_win')
+    except:
+        await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
 @bot.command()
 async def news(ctx):
     get = requests.get('https://vnexpress.net/')
@@ -621,5 +693,5 @@ def update(user, change, mode):
         save_member_data(user, member_data)
     else:
         print('error')
-bot.run('token')
+bot.run('OTcxNzU1MTg5MDMzOTI2Njc2.Gi4N02.0egIe9v5fFJs4J6mKtq7A55Bk90nnHFd9kozyw')
 #credit: Duc Anh
