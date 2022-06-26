@@ -14,23 +14,100 @@ import wikipedia
 import datetime
 import time
 from bs4 import BeautifulSoup
-bot = commands.Bot(command_prefix='/') 
+prefix = '/'
+bot = commands.Bot(command_prefix=f'{prefix}') 
 bot.remove_command("help")
 data_filename = "data.pickle"
 @bot.group(invoke_without_command=True)
-async def help(ctx):
-    em = discord.Embed(title = "help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot")
-    em.add_field(name = "other command", value = "xsmb, covid19, weather, youtube_search, translate, truyentranh24, wiki")
-    em.add_field(name = "game command", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu")
-    em.add_field(name = "role play command", value = "balance, bank, shop, work")
-    em.add_field(name = "default command bot", value = "help, offbot, ping")
-    em.add_field(name = "fun command", value = "thinh, mark, tiki, taoanhdep, shopmaihuong")
-    await ctx.send(embed = em)
+async def help(ctx, arg = None):
+    if arg == None:
+        em = discord.Embed(title = "ℹ️help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot và /help <command> để biết cách sử dụng")
+        em.add_field(name = "**✅other command**", value = "xsmb, covid19, weather, youtube_search, translate, truyentranh, wiki, news")
+        em.add_field(name = "**🎮game command**", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu, slot")
+        em.add_field(name = "**🏵️roleplay command**", value = "balance, bank, shop, work, daily, ")
+        em.add_field(name = "**⚙️system command bot**", value = "help, offbot, ping, callad, sendnoti")
+        em.add_field(name = "**🔫fun command**", value = "thinh, mark, tiki, taoanhdep, shopmaihuong, caunoihay, thayboi")
+        await ctx.send(embed = em)
+    elif arg == 'balance':
+        em = discord.Embed(title = "balance", description = "xem số tiền hiện đang có của bạn")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}balance")
+        await ctx.send(embed = em)
+    elif arg == 'bank':
+        em = discord.Embed(title = "bank", description = "ngân hàng hỗ trợ rút và gửi tiền của bạn")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}bank withdraw <amount>\n{prefix}bank deposit <amount>")
+        await ctx.send(embed = em)
+    elif arg == 'callad':
+        em = discord.Embed(title = "callad", description = "báo cáo vấn đề hoặc câu hỏi bạn muốn gửi đến admin")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}callad <vấn đề cần báo cáo>")
+        await ctx.send(embed = em)
+    elif arg == 'caunoihay':
+        em = discord.Embed(title = "caunoihay", description = "random một câu nói của các vĩ nhân:))")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}caunoihay")
+        await ctx.send(embed = em)
+    elif arg == 'covid19':
+        em = discord.Embed(title = "covid19", description = "xem thông tin về dịch bệnh covid 19 tại Việt Nam")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}covid19")
+        await ctx.send(embed = em)
+    elif arg == 'daily':
+        em = discord.Embed(title = "daily", description = "nhận thưởng online mỗi 24H")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}D>")
+        await ctx.send(embed = em)
+    elif arg == 'dhbc':
+        em = discord.Embed(title = "dhbc", description = "game đuổi hình bắt chữ:))")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}dhbc")
+        await ctx.send(embed = em)
+    elif arg == 'dovui':
+        em = discord.Embed(title = "dovui", description = "game đố vui")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}dovui")
+        await ctx.send(embed = em)
+    elif arg == 'keobuabao':
+        em = discord.Embed(title = "keobuabao", description = "game kéo búa bao với bot")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}keobuabao <kéo/búa/bao> <số tiền cược>")
+        await ctx.send(embed = em)
+    elif arg == 'mark':
+        em = discord.Embed(title = "mark", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}mark")
+        await ctx.send(embed = em)
+    elif arg == 'news':
+        em = discord.Embed(title = "news", description = "xem tin mới mỗi ngày trên vnexpress")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}news")
+        await ctx.send(embed = em)
+    elif arg == 'noitu':
+        em = discord.Embed(title = "noitu", description = "game nối từ cùng bot")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}noitu")
+        await ctx.send(embed = em)
+    elif arg == 'ping':
+        em = discord.Embed(title = "ping", description = "pong!")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}ping")
+        await ctx.send(embed = em)
+    elif arg == 'play_taixiu':
+        em = discord.Embed(title = "play_taixiu", description = "chơi game tài xỉu trên bot:)")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}play_taixiu <tài/xỉu> <số tiền cược>")
+        await ctx.send(embed = em)
+    elif arg == 'shop':
+        em = discord.Embed(title = "shop", description = "mua bán các vật phẩm trong bot")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}shop <buy/sell>")
+        await ctx.send(embed = em)
+    elif arg == 'shopmaihuong':
+        em = discord.Embed(title = "shopmaihuong", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}shopmaihuong")
+        await ctx.send(embed = em)
+    elif arg == 'slot':
+        em = discord.Embed(title = "slot", description = "game")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}slot <số tiền cược>")
+        await ctx.send(embed = em)
+    elif arg == 'taoanhdep':
+        em = discord.Embed(title = "taoanhdep", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}taoanhdep")
+        await ctx.send(embed = em)
+    else:
+        await ctx.send(f'lệnh bạn nhập không tồn tại hoặc do thằng admin lỏl lười làm nên để thế=)). có thể sử dụng {prefix}callad để gọi nó dậy')
 class Data:
     def __init__(self, wallet, bank, pc):
         self.wallet = wallet
         self.bank = bank
         self.pc = pc
+    
 #run bot
 #client
 @bot.event
@@ -103,8 +180,8 @@ async def youtube_search(ctx):
         await ctx.send('đây là các kết quả tìm kiếm {result}'.format(result = result))
 @bot.command()
 @commands.is_owner()
-async def offbot(ctx, m):
-    if (m.author.id == ctx.author.id == 716146182849560598): 
+async def offbot(ctx):
+    if (ctx.message.author.id == 716146182849560598): 
         await ctx.send('đã tắt bot!')
         print("off bot")
         await ctx.bot.logout()
@@ -115,47 +192,51 @@ async def ping(ctx):
     await ctx.send('pong!')
 @bot.command()
 async def play_taixiu(ctx, arg1 = None, arg2 = None):
-    try:
-        url = 'https://api.hclaptrinh.repl.co/api/taixiu'
-        get = requests.get(url)
-        data_txt = get.text
-        data_json = json.loads(data_txt)
-        result = data_json['result']
-        if result == 'xiu':
-            result = 'xỉu'
-        elif result == 'tai':
-            result = 'tài'
-        if arg1 == None:
-            await ctx.send('hãy cược tài hoặc xỉu')
-        elif arg2 == None or int(arg2) <= 50:
-            await ctx.send('số tiền cược không cược để trống và phải lớn hơn 50$')
-        elif arg1 == result:
-            gif = 'https://media1.giphy.com/media/ckHAdLU2OmY7knUClD/giphy.gif?cid=ecf05e47venaa45nhe4pmfsckgtrjasrpdzs6vtmpvwya6fk&rid=giphy.gif&ct=g'
-            gif2 = 'https://media1.giphy.com/media/g9582DNuQppxC/giphy.gif?cid=ecf05e4743jop5ctofl2a5763ih04tc5b91dfnor287cu5tv&rid=giphy.gif&ct=g'
-            em_load = discord.Embed(colour = ctx.author.color, description = 'lắc xúc sắc...')
-            em_load.set_image(url = gif)
-            em_win = discord.Embed(colour = ctx.author.color, description = f'bạn đã thắng kết quả là: {result} và gom về được {arg2}$ tiền thưởng')
-            em_win.set_image(url = gif2)
-            await ctx.send(embed = em_load)
-            await asyncio.sleep(3)
-            await ctx.send(embed = em_win)
-            update(ctx.message.author.id, arg2, 'keobuabao_win')
-        elif arg1 != result:
-            gif = 'https://media1.giphy.com/media/ckHAdLU2OmY7knUClD/giphy.gif?cid=ecf05e47venaa45nhe4pmfsckgtrjasrpdzs6vtmpvwya6fk&rid=giphy.gif&ct=g'
-            gif2 = 'https://media1.giphy.com/media/g9582DNuQppxC/giphy.gif?cid=ecf05e4743jop5ctofl2a5763ih04tc5b91dfnor287cu5tv&rid=giphy.gif&ct=g'
-            em_load = discord.Embed(colour = ctx.author.color, description = 'lắc xúc sắc...')
-            em_load.set_image(url = gif)
-            em_win = discord.Embed(colour = ctx.author.color, description = f'bạn đã thua, kết quả là: {result} và mất {arg2}$ tiền cược')
-            em_win.set_image(url = gif2)
-            await ctx.send(embed = em_load)
-            await asyncio.sleep(3)
-            await ctx.send(embed = em_win)
-            update(ctx.message.author.id, arg2, 'keobuabao_lose')
-        else:
-            await ctx.send('lỗi')
-    except Exception as e:
-        print(e)
-        await ctx.send('error')
+    member_data = load_member_data(ctx.message.author.id)
+    if member_data.wallet < int(arg2):
+        await ctx.send('không đủ tiền để chơi:)')
+    else:
+        try:
+            url = 'https://api.hclaptrinh.repl.co/api/taixiu'
+            get = requests.get(url)
+            data_txt = get.text
+            data_json = json.loads(data_txt)
+            result = data_json['result']
+            if result == 'xiu':
+                result = 'xỉu'
+            elif result == 'tai':
+                result = 'tài'
+            if arg1 == None:
+                await ctx.send('hãy cược tài hoặc xỉu')
+            elif arg2 == None or int(arg2) <= 50:
+                await ctx.send('số tiền cược không cược để trống và phải lớn hơn 50$')
+            elif arg1 == result:
+                gif = 'https://media1.giphy.com/media/ckHAdLU2OmY7knUClD/giphy.gif?cid=ecf05e47venaa45nhe4pmfsckgtrjasrpdzs6vtmpvwya6fk&rid=giphy.gif&ct=g'
+                gif2 = 'https://media1.giphy.com/media/g9582DNuQppxC/giphy.gif?cid=ecf05e4743jop5ctofl2a5763ih04tc5b91dfnor287cu5tv&rid=giphy.gif&ct=g'
+                em_load = discord.Embed(colour = ctx.author.color, description = 'đang lắc xúc sắc...')
+                em_load.set_image(url = gif)
+                em_win = discord.Embed(colour = ctx.author.color, description = f'bạn đã thắng kết quả là: {result} và gom về được {arg2}$ tiền thưởng')
+                em_win.set_image(url = gif2)
+                await ctx.send(embed = em_load)
+                await asyncio.sleep(3)
+                await ctx.send(embed = em_win)
+                update(ctx.message.author.id, arg2, 'keobuabao_win')
+            elif arg1 != result:
+                gif = 'https://media1.giphy.com/media/ckHAdLU2OmY7knUClD/giphy.gif?cid=ecf05e47venaa45nhe4pmfsckgtrjasrpdzs6vtmpvwya6fk&rid=giphy.gif&ct=g'
+                gif2 = 'https://media3.giphy.com/media/l22ysLe54hZP0wubek/giphy.gif?cid=ecf05e47mba9xtd5rurzzo1flalwaqu6znpuld9vm6b2rz13&rid=giphy.gif&ct=g'
+                em_load = discord.Embed(colour = ctx.author.color, description = 'đang lắc xúc sắc...')
+                em_load.set_image(url = gif)
+                em_win = discord.Embed(colour = ctx.author.color, description = f'bạn đã thua, kết quả là: {result} và mất {arg2}$ tiền cược')
+                em_win.set_image(url = gif2)
+                await ctx.send(embed = em_load)
+                await asyncio.sleep(3)
+                await ctx.send(embed = em_win)
+                update(ctx.message.author.id, arg2, 'keobuabao_lose')
+            else:
+                await ctx.send('lỗi')
+        except Exception as e:
+            print(e)
+            await ctx.send('error')
 @bot.command()
 async def dovui(ctx):
     url_dovui = 'http://manhict.tech/game/dovuiv1'
@@ -282,9 +363,12 @@ async def bank(ctx):
 @bank.command()
 @commands.cooldown(3, 2400, commands.BucketType.user)
 async def withdraw(ctx, arg = None):
-    if arg == None:
+    member_data = load_member_data(ctx.message.author.id)
+    if member_data.bank < int(arg):
+        await ctx.send('m ko đủ số tiền để rút, t ko ngu đâu mà đòi lừa=))')
+    elif arg == None:
         await ctx.send('nhập số tiền cần rút')
-    else:
+    elif member_data.bank >= int(arg):
         await ctx.send(f'đã rút {arg}$ từ tài khoản')
         update(ctx.message.author.id, arg, 'bank')
 @withdraw.error
@@ -294,9 +378,12 @@ async def withdraw_error(ctx, error):
 @bank.command(name = "deposit")
 @commands.cooldown(3, 2400, commands.BucketType.user)
 async def deposit(ctx, arg = None):
+    member_data = load_member_data(ctx.message.author.id)
     if arg == None:
         await ctx.send('nhập số tiền cần bỏ vào tài khoản')
-    else:
+    elif member_data.wallet < int(arg):
+        await ctx.send('m ko đủ số tiền để gửi vào tài khoản, t ko ngu đâu mà đòi lừa=))')
+    elif member_data.wallet >= int(arg):
         await ctx.send(f'đã trừ {arg}$ của ví')
         update(ctx.message.author.id, arg, 'wallet')
 @deposit.error
@@ -318,30 +405,33 @@ async def keobuabao(ctx, arg1 = None, arg2 = None):
     member_data = load_member_data(ctx.message.author.id)
     choice = ['kéo', 'búa', 'bao']
     bot = random.choice(choice)
-    if arg1 == None or arg2 == None or arg1 == None and arg2 == None:
-        await ctx.send('chỉ nhập kéo, búa hoặc bao')
-    elif arg1 == bot:
-        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Hòa')
-    elif arg1 == 'bao' and bot == 'búa':
-        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Bạn đã thắng và nhận đươc {arg2}$')
-        update(ctx.message.author.id, arg2, 'keobuabao_win')
-    elif arg1 == 'bao' and bot == 'kéo':
-        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
-        update(ctx.message.author.id, arg2, 'keobuabao_lose')
-    elif arg1 == 'kéo' and bot == 'búa':
-        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
-        update(ctx.message.author.id, arg2, 'keobuabao_lose')
-    elif arg1 == 'kéo' and bot == 'bao':
-        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thắng và nhận được {arg2}$')
-        update(ctx.message.author.id, arg2, 'keobuabao_win')
-    elif arg1 == 'búa' and bot == 'bao':
-        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
-        update(ctx.message.author.id, arg2, 'keobuabao_lose')
-    elif arg1 == 'búa' and bot == 'kéo':
-        await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thắng và nhận được {arg2}$')
-        update(ctx.message.author.id, arg2, 'keobuabao_win')
+    if member_data.wallet < int(arg2):
+        await ctx.send('ko đủ tiền để chơi')
     else:
-        await ctx.send('lỗi')
+        if arg1 == None or arg2 == None or arg1 == None and arg2 == None:
+            await ctx.send('sai cú pháp')
+        elif arg1 == bot:
+            await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Hòa')
+        elif arg1 == 'bao' and bot == 'búa':
+            await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Bạn đã thắng và nhận đươc {arg2}$')
+            update(ctx.message.author.id, arg2, 'keobuabao_win')
+        elif arg1 == 'bao' and bot == 'kéo':
+            await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
+            update(ctx.message.author.id, arg2, 'keobuabao_lose')
+        elif arg1 == 'kéo' and bot == 'búa':
+            await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
+            update(ctx.message.author.id, arg2, 'keobuabao_lose')
+        elif arg1 == 'kéo' and bot == 'bao':
+            await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thắng và nhận được {arg2}$')
+            update(ctx.message.author.id, arg2, 'keobuabao_win')
+        elif arg1 == 'búa' and bot == 'bao':
+            await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
+            update(ctx.message.author.id, arg2, 'keobuabao_lose')
+        elif arg1 == 'búa' and bot == 'kéo':
+            await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thắng và nhận được {arg2}$')
+            update(ctx.message.author.id, arg2, 'keobuabao_win')
+        else:
+            await ctx.send('lỗi')
 @bot.command()
 async def vuatiengviet(ctx):
     try: 
@@ -358,7 +448,7 @@ async def vuatiengviet(ctx):
             def check(m):
                 return m.author.id == ctx.author.id
             message = await bot.wait_for('message', check=check)
-            if message.content == random_word_vuatiengviet:
+            if message.content.lower() == random_word_vuatiengviet:
                 await ctx.send(f'bạn đã trả lời đúng, đáp án là "{random_word_vuatiengviet}"')
             else:
                 await ctx.send(f'sai rồi đáp án là "{random_word_vuatiengviet}"')
@@ -386,7 +476,7 @@ async def tiki(ctx):
     def check(m):
         return m.author.id == ctx.author.id
     message = await bot.wait_for('message', check=check)
-    url_tiki = 'http://manhict.tech/tiki?text='
+    url_tiki = 'https://api.phamvandien.xyz/tiki?text='
     full_url_tiki = url_tiki + str(message.content)
     get_tiki = requests.get(full_url_tiki)
     file = open("tiki.png", "wb")
@@ -570,7 +660,7 @@ async def shopmaihuong(ctx):
         value = message.content.lower().split(" | ")
         text1 = str(value[0])
         text2 = str(value[1])
-        url = 'https://manhict.tech/shopmaihuong?text1=' + text1 + "&text2=" + text2
+        url = 'https://api.phamvandien.xyz/shopmaihuong?text1=' + text1 + "&text2=" + text2
         get = requests.get(url)
         file = open("shopmaihuong.png", "wb")
         file.write(get.content)
@@ -619,23 +709,27 @@ async def daily_error(ctx, error):
         await ctx.send('bạn đã nhận thưởng ngày hôm nay rồi hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
 async def slot(ctx, arg = None):
-    try:
-        if int(arg) == None:
-            await ctx.send('sai cú pháp')
-        else:
-            url = 'https://manhict.tech/game/slot'
-            get = requests.get(url)
-            data_txt = get.text
-            data = json.loads(data_txt)
-            slot = data['data']
-            if data['result'] == "lose":
-                await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thua! {arg}$')
-                update(ctx.message.author.id, arg, 'keobuabao_lose')
-            elif data['result'] == "win":
-                await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thắng {arg}$')
-                update(ctx.message.author.id, arg, 'keobuabao_win')
-    except:
-        await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
+    member_data = load_member_data(ctx.message.author.id)
+    if member_data.wallet < int(arg):
+        await ctx.send('tiền cược không hợp lệ')
+    else:
+        try:
+            if int(arg) == None:
+                await ctx.send('sai cú pháp')
+            else:
+                url = 'https://manhict.tech/game/slot'
+                get = requests.get(url)
+                data_txt = get.text
+                data = json.loads(data_txt)
+                slot = data['data']
+                if data['result'] == "lose":
+                    await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thua! {arg}$')
+                    update(ctx.message.author.id, arg, 'keobuabao_lose')
+                elif data['result'] == "win":
+                    await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thắng {arg}$')
+                    update(ctx.message.author.id, arg, 'keobuabao_win')
+        except:
+            await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
 @bot.command()
 async def news(ctx):
     get = requests.get('https://vnexpress.net/')
