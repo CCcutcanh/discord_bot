@@ -15,7 +15,7 @@ import datetime
 import time
 from bs4 import BeautifulSoup
 prefix = '/'
-bot = commands.Bot(command_prefix=f'{prefix}') 
+bot = commands.Bot(command_prefix=f'{prefix}')
 bot.remove_command("help")
 data_filename = "data.pickle"
 @bot.group(invoke_without_command=True)
@@ -23,7 +23,7 @@ async def help(ctx, arg = None):
     if arg == None:
         em = discord.Embed(title = "ℹ️help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot và /help <command> để biết cách sử dụng")
         em.add_field(name = "**✅other command**", value = "xsmb, covid19, weather, youtube_search, translate, truyentranh, wiki, news")
-        em.add_field(name = "**🎮game command**", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu, slot")
+        em.add_field(name = "**🎮game command**", value = "play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu, slot")
         em.add_field(name = "**🏵️roleplay command**", value = "balance, bank, shop, work, daily, ")
         em.add_field(name = "**⚙️system command bot**", value = "help, offbot, ping, callad, sendnoti")
         em.add_field(name = "**🔫fun command**", value = "thinh, mark, tiki, taoanhdep, shopmaihuong, caunoihay, thayboi")
@@ -55,10 +55,6 @@ async def help(ctx, arg = None):
     elif arg == 'dhbc':
         em = discord.Embed(title = "dhbc", description = "game đuổi hình bắt chữ:))")
         em.add_field(name = "**cách dùng**", value = f"{prefix}dhbc")
-        await ctx.send(embed = em)
-    elif arg == 'dovui':
-        em = discord.Embed(title = "dovui", description = "game đố vui")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}dovui")
         await ctx.send(embed = em)
     elif arg == 'keobuabao':
         em = discord.Embed(title = "keobuabao", description = "game kéo búa bao với bot")
@@ -99,6 +95,50 @@ async def help(ctx, arg = None):
     elif arg == 'taoanhdep':
         em = discord.Embed(title = "taoanhdep", description = "ghép ảnh xàm")
         em.add_field(name = "**cách dùng**", value = f"{prefix}taoanhdep")
+        await ctx.send(embed = em)
+    elif arg == 'thayboi':
+        em = discord.Embed(title = "thayboi", description = "xem bói online:))")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}thayboi")
+        await ctx.send(embed = em)
+    elif arg == 'thinh':
+        em = discord.Embed(title = "thinh", description = "thính")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}thinh")
+        await ctx.send(embed = em)
+    elif arg == 'tiki':
+        em = discord.Embed(title = "tiki", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}tiki")
+        await ctx.send(embed = em)
+    elif arg == 'translate':
+        em = discord.Embed(title = "translate", description = "google dịch")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}translate")
+        await ctx.send(embed = em)
+    elif arg == 'truyentranh':
+        em = discord.Embed(title = "truyentranh", description = "xem truyện tranh và tìm những truyện mới nhất trên toptruyen.net và truyentranh24.com")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}truyentranh search <keywword> (tìm truyện)\n{prefix}truyentranh news (xem các truyện mới nhất trên toptruyen.net)")
+        await ctx.send(embed = em)
+    elif arg == 'vuatiengviet':
+        em = discord.Embed(title = "vuatiengviet", description = "chơi vua tiếng việt:0")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}vuatiengviet")
+        await ctx.send(embed = em)
+    elif arg == 'weather ':
+        em = discord.Embed(title = "weather", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}weather <location>")
+        await ctx.send(embed = em)
+    elif arg == 'wiki':
+        em = discord.Embed(title = "wiki", description = "tìm kiếm thông tin trên wikipedia")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}wiki <keywword>")
+        await ctx.send(embed = em)
+    elif arg == 'work':
+        em = discord.Embed(title = "work", description = "có làm thì mới có ăn")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}work")
+        await ctx.send(embed = em)
+    elif arg == 'xsmb':
+        em = discord.Embed(title = "xsmb", description = "xem kết quả xổ số miền Bắc")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}xsmb")
+        await ctx.send(embed = em)
+    elif arg == 'youtube_search':
+        em = discord.Embed(title = "youtube_search", description = "tìm video youtube")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}youtube_search <keyword>")
         await ctx.send(embed = em)
     else:
         await ctx.send(f'lệnh bạn nhập không tồn tại hoặc do thằng admin lỏl lười làm nên để thế=)). có thể sử dụng {prefix}callad để gọi nó dậy')
@@ -141,30 +181,31 @@ async def xsmb(ctx):
 #weather
 @bot.command()
 async def weather(ctx, *, arg = None):
-    url = f'https://api.openweathermap.org/data/2.5/weather?q={arg}&lang=vi&appid=f5e58e5107262dd200ef30cc9e47355a'
-    image = f'http://mewdev.pro/api/v2/weather?location={arg}&apikey=Meew.90c3759fff62c248ba845561583c76fa'
-    get_image = requests.get(image)
-    get = requests.get(url)
-    img_txt = get_image.text
-    data_txt = get.text
-    data_json = json.loads(data_txt)
-    image_json = json.loads(img_txt)
     if arg == None:
         await ctx.send('sai cú pháp')
-    elif data_json['cod'] != "404" and image_json['success'] == True:
-        img = requests.get(image_json['data'])
-        file = open("weather.png", "wb")
-        file.write(img.content)
-        file.close()
-        temp_min = data_json['main']['temp_min'] - 273.15
-        temp_max = data_json['main']['temp_max'] - 273.15
-        feel_like = data_json['main']['feels_like'] - 273.15
-        sunrise = datetime.datetime.fromtimestamp(int(data_json['sys']['sunrise']))
-        sunset = datetime.datetime.fromtimestamp(int(data_json['sys']['sunset']))
-        description = data_json['weather'][0]['description']      
-        await ctx.send(f'🌡️nhiệt độ cao nhât - thấp nhất: {temp_max} - {temp_min}\n🌡️nhiệt độ cảm nhận được: {feel_like}\n🌅mặt trời mọc: {sunrise}\n🌄mặt trời lặn: {sunset}\n🗄️mô tả: {description}', file = discord.File('weather.png'))
-    else:
-        await ctx.send('thành phố không tồn tại\nhãy thử viết tên thành phố không dấu, cách giữa hai từ\nví dụ: /weather ha noi')
+    elif arg != None:
+        url = f'https://api.openweathermap.org/data/2.5/weather?q={arg}&lang=vi&appid=f5e58e5107262dd200ef30cc9e47355a'
+        image = f'http://mewdev.pro/api/v2/weather?location={arg}&apikey=Meew.90c3759fff62c248ba845561583c76fa'
+        get_image = requests.get(image)
+        get = requests.get(url)
+        img_txt = get_image.text
+        data_txt = get.text
+        data_json = json.loads(data_txt)
+        image_json = json.loads(img_txt)
+        if data_json['cod'] != "404" and image_json['success'] == True:
+            img = requests.get(image_json['data'])
+            file = open("weather.png", "wb")
+            file.write(img.content)
+            file.close()
+            temp_min = data_json['main']['temp_min'] - 273.15
+            temp_max = data_json['main']['temp_max'] - 273.15
+            feel_like = data_json['main']['feels_like'] - 273.15
+            sunrise = datetime.datetime.fromtimestamp(int(data_json['sys']['sunrise']))
+            sunset = datetime.datetime.fromtimestamp(int(data_json['sys']['sunset']))
+            description = data_json['weather'][0]['description']      
+            await ctx.send(f'🌡️nhiệt độ cao nhât - thấp nhất: {temp_max} - {temp_min}\n🌡️nhiệt độ cảm nhận được: {feel_like}\n🌅mặt trời mọc: {sunrise}\n🌄mặt trời lặn: {sunset}\n🗄️mô tả: {description}', file = discord.File('weather.png'))
+        else:
+            await ctx.send('thành phố không tồn tại\nhãy thử viết tên thành phố không dấu, cách giữa hai từ\nví dụ: ?weather ha noi')
     print(data_json['cod'])
     print(image_json['success'])
 @bot.command()
@@ -237,27 +278,6 @@ async def play_taixiu(ctx, arg1 = None, arg2 = None):
         except Exception as e:
             print(e)
             await ctx.send('error')
-@bot.command()
-async def dovui(ctx):
-    url_dovui = 'http://manhict.tech/game/dovuiv1'
-    get_dovui = requests.get(url_dovui)
-    data_dovui = get_dovui.text
-    json_dovui = json.loads(data_dovui)
-    cau_hoi = json_dovui['questions']
-    a_dv = json_dovui['a']
-    b_dv = json_dovui['b']
-    c_dv = json_dovui['c']
-    d_dv = json_dovui['d']
-    dap_an = json_dovui['dapan']
-    result_dovui = """{cau_hoi} \nA.{a}\nB.{b}\nC.{c}\nD.{d}""".format(cau_hoi = str(cau_hoi), a = str(a_dv), b = str(b_dv), c = str(c_dv), d = str(d_dv))
-    await ctx.send(result_dovui)
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check = check)
-    if(message.content == dap_an):
-        await ctx.send('câu trả lời chính xác, đáp án là {dap_an}'.format(dap_an = str(dap_an)))
-    if(message.content != dap_an):
-        await ctx.send('chưa chính xác rồiiiii:((, đáp án là {dap_an}'.format(dap_an = str(dap_an)))
 @bot.command(name = "work")
 @commands.cooldown(1, 3600, commands.BucketType.user)
 async def work(ctx):
@@ -436,7 +456,7 @@ async def keobuabao(ctx, arg1 = None, arg2 = None):
 async def vuatiengviet(ctx):
     try: 
         url_vuatiengviet = 'https://api.phamvandien.xyz/vuatiengviet/image?word='
-        word_vuatiengviet = ["tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ", "nông nghiệp", "băng hà", "hiếu động", "sung sức", "công lao", "tâm tình", "cờ bạc", "ngu ngốc"]
+        word_vuatiengviet = ["tôi yêu bạn", "cá koi", "cuốn sách", "tình yêu", "độc dược", "cô đọng", "huyền thoại", "sao băng", "quấn quýt", "bậc thầy", "ước vọng", "mơ mộng", "tình tứ", "mộng mơ", "nông nghiệp", "băng hà", "hiếu động", "sung sức", "công lao", "tâm tình", "cờ bạc", "ngu ngốc", "nông trường", "trường thọ", "tôn trọng"]
         random_word_vuatiengviet = random.choice(word_vuatiengviet)
         full_url_vuatiengviet = url_vuatiengviet + random_word_vuatiengviet
         get_vuatiengviet = requests.get(full_url_vuatiengviet)
@@ -745,7 +765,6 @@ async def news(ctx):
     link = results[1]
     des = dess[1]
     await ctx.send(f'tin mới nhất hôm nay: {title}{des}\nlink: {link}')
-
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
