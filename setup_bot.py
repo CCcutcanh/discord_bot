@@ -23,18 +23,18 @@ async def help(ctx, arg = None):
     if arg == None:
         em = discord.Embed(title = "ℹ️help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot và /help <command> để biết cách sử dụng")
         em.add_field(name = "**✅other command**", value = "xsmb, covid19, weather, youtube_search, translate, truyentranh, wiki, news")
-        em.add_field(name = "**🎮game command**", value = "play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu, slot")
+        em.add_field(name = "**🎮game command**", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu, slot")
         em.add_field(name = "**🏵️roleplay command**", value = "balance, bank, shop, work, daily, ")
         em.add_field(name = "**⚙️system command bot**", value = "help, offbot, ping, callad, sendnoti")
         em.add_field(name = "**🔫fun command**", value = "thinh, mark, tiki, taoanhdep, shopmaihuong, caunoihay, thayboi")
         await ctx.send(embed = em)
     elif arg == 'balance':
         em = discord.Embed(title = "balance", description = "xem số tiền hiện đang có của bạn")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}balance")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}balance @mention")
         await ctx.send(embed = em)
     elif arg == 'bank':
         em = discord.Embed(title = "bank", description = "ngân hàng hỗ trợ rút và gửi tiền của bạn")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}bank withdraw <amount>\n{prefix}bank deposit <amount>")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}bank withdraw <amount>\n{prefix}bank deposit <amount>\n{prefix}bank send <amount> @mention")
         await ctx.send(embed = em)
     elif arg == 'callad':
         em = discord.Embed(title = "callad", description = "báo cáo vấn đề hoặc câu hỏi bạn muốn gửi đến admin")
@@ -139,6 +139,10 @@ async def help(ctx, arg = None):
     elif arg == 'youtube_search':
         em = discord.Embed(title = "youtube_search", description = "tìm video youtube")
         em.add_field(name = "**cách dùng**", value = f"{prefix}youtube_search <keyword>")
+        await ctx.send(embed = em)
+    elif arg == 'dovui':
+        em = discord.Embed(title = "dovui", description = "game đố vui, không vui thì thôi")
+        em.add_field(name = "**cách dùng**", value = f"{prefix}dovui")
         await ctx.send(embed = em)
     else:
         await ctx.send(f'lệnh bạn nhập không tồn tại hoặc do thằng admin lỏl lười làm nên để thế=)). có thể sử dụng {prefix}callad để gọi nó dậy')
@@ -325,13 +329,23 @@ async def work_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('bạn đã làm việc quá nhiều rồi, hãy nghỉ ngơi và quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
-async def balance(message):
-    member_data = load_member_data(message.author.id)
-    embed = discord.Embed(title=f"số tiền của {message.author.display_name}")
-    embed.add_field(name="tiền mặt", value=str(member_data.wallet))
-    embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
-
-    await message.channel.send(embed=embed)
+async def balance(message, member: discord.User=None):
+    try:
+        if member == None:
+            member_data = load_member_data(message.author.id)
+            embed = discord.Embed(title=f"số tiền của {message.author.display_name}")
+            embed.add_field(name="tiền mặt", value=str(member_data.wallet))
+            embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
+            await message.channel.send(embed=embed)
+        else:
+            member_data = load_member_data(member.id)
+            embed = discord.Embed(title=f"số tiền của {member}")
+            embed.add_field(name="tiền mặt", value=str(member_data.wallet))
+            embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
+            await message.channel.send(embed=embed)
+    except Exception as e:
+        print(e)
+        await message.channel.send('error')
 @bot.group(invoke_without_command=True)
 async def shop(ctx):
     await ctx.send('nơi mua bán các vật trong bot\nhãy chọn shop sell(bán đồ) hoặc shop buy(mua đồ)')
@@ -410,6 +424,22 @@ async def deposit(ctx, arg = None):
 async def deposit_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('ngân hàng đóng cửa rồi, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
+@bank.command(name = "send")
+async def send(ctx, member: discord.User=None, amount = None):
+    data_send_user = load_member_data(ctx.message.author.id) 
+    data_receive_user = load_member_data(member.id)
+    if discord.User == None or amount == None or discord.User == None and amount == None:
+        await ctx.send('sai cú pháp')
+    elif data_send_user.bank < int(amount):
+        await ctx.send('không đủ số tiền trong tài khoản để gửi')
+    else:
+        try:
+            update(ctx.message.author.id, amount, 'send_user')
+            update(member.id, amount, 'receive_user')
+            await ctx.send(f'đã chuyển tiền thành công cho {member.mention}')
+        except Exception as e:
+            print(e)
+            await ctx.send('error')
 @bot.command()
 async def thinh(ctx):
     global random, json
@@ -765,6 +795,81 @@ async def news(ctx):
     link = results[1]
     des = dess[1]
     await ctx.send(f'tin mới nhất hôm nay: {title}{des}\nlink: {link}')
+@bot.command()
+async def dovui(ctx):
+    try:
+        get = requests.get('https://www.nguyenmanh.name.vn/api/dovui2?apikey=rcwGtaxg')
+        data_txt = get.text
+        data_json = json.loads(data_txt)
+        question = data_json['result']['question']
+        option = data_json['result']['option']
+        result = data_json['result']['correct']
+        if len(option) == 3:
+            option1 = data_json['result']['option'][0]
+            option2 = data_json['result']['option'][1]
+            option3 = data_json['result']['option'][2]
+            await ctx.send(f'{question}\n1. {option1}\n2. {option2}\n3. {option3}\nTrả lời theo số thứ tự các đáp')
+            def check(m):
+                return m.author.id == ctx.author.id
+            message = await bot.wait_for('message', check=check)
+            if int(message.content.lower()) == result:
+                if result == 1:
+                    result = option1
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là {result}')
+                elif result == 2:
+                    result = option2
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là {result}')
+                elif result == 3:
+                    result = option3
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là {result}')
+            elif int(message.content.lower()) != result:
+                if result == 1:
+                    result = option1
+                    await ctx.send(f'bạn đã trả lời sai rồi:(, đáp án đúng là {result}')
+                elif result == 2:
+                    result = option2
+                    await ctx.send(f'bạn đã trả lời sai rồi:(, đáp án đúng là {result}')
+                elif result == 3:
+                    result = option3
+                    await ctx.send(f'bạn đã trả lời sai rồi:(, đáp án đúng là {result}')
+        elif len(option) == 4:
+            option1 = data_json['result']['option'][0]
+            option2 = data_json['result']['option'][1]
+            option3 = data_json['result']['option'][2]
+            option4 = data_json['result']['option'][3]
+            await ctx.send(f'{question}\n1. {option1}\n2. {option2}\n3. {option3}\n4. {option4}\nTrả lời theo số thứ tự các đáp')
+            def check(m):
+                return m.author.id == ctx.author.id
+            message = await bot.wait_for('message', check=check)
+            if int(message.content.lower()) == result:
+                if result == 1:
+                    result = option1
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là {result}')
+                elif result == 2:
+                    result = option2
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là {result}')
+                elif result == 3:
+                    result = option3
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là {result}')
+                elif result == 4:
+                    result = option4
+                    await ctx.send(f'bạn đã trả lời đúng, đáp án là {result}')
+            elif int(message.content.lower()) != result:
+                if result == 1:
+                    result = option1
+                    await ctx.send(f'bạn đã trả lời sai rồi:(, đáp án đúng là {result}')
+                elif result == 2:
+                    result = option2
+                    await ctx.send(f'bạn đã trả lời sai rồi:(, đáp án đúng là {result}')
+                elif result == 3:
+                    result = option3
+                    await ctx.send(f'bạn đã trả lời sai rồi:(, đáp án đúng là {result}')
+                elif result == 4:
+                    result = option4
+                    await ctx.send(f'bạn đã trả lời sai rồi:(, đáp án đúng là {result}')
+    except Exception as e:
+        print(e)
+        await ctx.send(f'lệnh bạn đang sử dụng đã xảy ra lỗi, hãy báo cáo về admin bằng lệnh {prefix}callad, hoặc câu trả lời của bạn không phải là một con số')
 #Functions
 def load_data():
     if os.path.isfile(data_filename):
@@ -803,6 +908,12 @@ def update(user, change, mode):
         save_member_data(user, member_data)
     elif mode == 'keobuabao_lose':
         member_data.wallet -= int(change)
+        save_member_data(user, member_data)
+    elif mode == 'receive_user':
+        member_data.bank += int(change)
+        save_member_data(user, member_data)
+    elif mode == 'send_user':
+        member_data.bank -= int(change)
         save_member_data(user, member_data)
     else:
         print('error')
