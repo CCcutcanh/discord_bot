@@ -24,7 +24,7 @@ async def help(ctx, arg = None):
         em = discord.Embed(title = "ℹ️help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot và /help <command> để biết cách sử dụng")
         em.add_field(name = "**✅other command**", value = "xsmb, covid19, weather, youtube_search, translate, truyentranh, wiki, news")
         em.add_field(name = "**🎮game command**", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu, slot")
-        em.add_field(name = "**🏵️roleplay command**", value = "balance, bank, shop, work, daily, ")
+        em.add_field(name = "**🏵️roleplay command**", value = "balance, bank, work, daily, ")
         em.add_field(name = "**⚙️system command bot**", value = "help, offbot, ping, callad, sendnoti")
         em.add_field(name = "**🔫fun command**", value = "thinh, mark, tiki, taoanhdep, shopmaihuong, caunoihay, thayboi")
         await ctx.send(embed = em)
@@ -79,10 +79,6 @@ async def help(ctx, arg = None):
     elif arg == 'play_taixiu':
         em = discord.Embed(title = "play_taixiu", description = "chơi game tài xỉu trên bot:)")
         em.add_field(name = "**cách dùng**", value = f"{prefix}play_taixiu <tài/xỉu> <số tiền cược>")
-        await ctx.send(embed = em)
-    elif arg == 'shop':
-        em = discord.Embed(title = "shop", description = "mua bán các vật phẩm trong bot")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}shop <buy/sell>")
         await ctx.send(embed = em)
     elif arg == 'shopmaihuong':
         em = discord.Embed(title = "shopmaihuong", description = "ghép ảnh xàm")
@@ -146,11 +142,6 @@ async def help(ctx, arg = None):
         await ctx.send(embed = em)
     else:
         await ctx.send(f'lệnh bạn nhập không tồn tại hoặc do thằng admin lỏl lười làm nên để thế=)). có thể sử dụng {prefix}callad để gọi nó dậy')
-class Data:
-    def __init__(self, wallet, bank, pc):
-        self.wallet = wallet
-        self.bank = bank
-        self.pc = pc
     
 #run bot
 #client
@@ -237,8 +228,9 @@ async def ping(ctx):
     await ctx.send('pong!')
 @bot.command()
 async def play_taixiu(ctx, arg1 = None, arg2 = None):
-    member_data = load_member_data(ctx.message.author.id)
-    if member_data.wallet < int(arg2):
+    await open_account(ctx.message.author.id)
+    member_data = await get_bank_data()
+    if member_data[str(ctx.message.author.id)]["Wallet"] < int(arg2):
         await ctx.send('không đủ tiền để chơi:)')
     else:
         try:
@@ -265,7 +257,7 @@ async def play_taixiu(ctx, arg1 = None, arg2 = None):
                 await ctx.send(embed = em_load)
                 await asyncio.sleep(3)
                 await ctx.send(embed = em_win)
-                update(ctx.message.author.id, arg2, 'keobuabao_win')
+                await update(ctx.message.author.id, arg2, 'keobuabao_win')
             elif arg1 != result:
                 gif = 'https://media1.giphy.com/media/ckHAdLU2OmY7knUClD/giphy.gif?cid=ecf05e47venaa45nhe4pmfsckgtrjasrpdzs6vtmpvwya6fk&rid=giphy.gif&ct=g'
                 gif2 = 'https://media3.giphy.com/media/l22ysLe54hZP0wubek/giphy.gif?cid=ecf05e47mba9xtd5rurzzo1flalwaqu6znpuld9vm6b2rz13&rid=giphy.gif&ct=g'
@@ -276,7 +268,7 @@ async def play_taixiu(ctx, arg1 = None, arg2 = None):
                 await ctx.send(embed = em_load)
                 await asyncio.sleep(3)
                 await ctx.send(embed = em_win)
-                update(ctx.message.author.id, arg2, 'keobuabao_lose')
+                await update(ctx.message.author.id, arg2, 'keobuabao_lose')
             else:
                 await ctx.send('lỗi')
         except Exception as e:
@@ -290,35 +282,40 @@ async def work(ctx):
             return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1", "2", "3", "4", "5"]
     message = await bot.wait_for('message', check = check)
     if message.content.lower() == "1":
-        member_data = load_member_data(message.author.id)
+        await open_account(message.author.id)
+        member_data = await get_bank_data()
         earning = random.randrange(301)
-        member_data.bank += earning
+        member_data[str(ctx.author.id)]['Bank'] += earning
         await ctx.send(f"bạn bán vé số và kiếm được {earning}$!")
-        save_member_data(message.author.id, member_data)
-    if message.content.lower() == "2":
-        member_data = load_member_data(message.author.id)
+        save_member_data(member_data)
+    elif message.content.lower() == "2":
+        await open_account(message.author.id)
+        member_data = await get_bank_data()
         earning = random.randrange(301)
-        member_data.bank += earning
+        member_data[str(ctx.author.id)]['Bank'] += earning
         await ctx.send(f"bạn làm thợ sửa xe và kiếm được {earning}$!")
-        save_member_data(message.author.id, member_data)
-    if message.content.lower() == "3":
-        member_data = load_member_data(message.author.id)
+        save_member_data(member_data)
+    elif message.content.lower() == "3":
+        await open_account(message.author.id)
+        member_data = await get_bank_data()
         earning = random.randrange(301)
-        member_data.bank += earning
+        member_data[str(ctx.author.id)]['Bank'] += earning
+        save_member_data(member_data)
         await ctx.send(f"bạn làm lập trình viên và kiếm được {earning}$!")
-        save_member_data(message.author.id, member_data)
-    if message.content.lower() == "4":
-        member_data = load_member_data(message.author.id)
+    elif message.content.lower() == "4":
+        await open_account(message.author.id)
+        member_data = await get_bank_data()
         earning = random.randrange(301)
-        member_data.bank += earning
+        member_data[str(ctx.author.id)]['Bank'] += earning
+        save_member_data(member_data)
         await ctx.send(f"bạn làm thợ hồ và kiếm được {earning}$!")
-        save_member_data(message.author.id, member_data)
-    if message.content.lower() == "5":
-        member_data = load_member_data(message.author.id)
+    elif message.content.lower() == "5":
+        await open_account(message.author.id)
+        member_data = await get_bank_data()
         earning = random.randrange(301)
-        member_data.bank += earning
+        member_data[str(ctx.author.id)]['Bank'] += earning
+        save_member_data(member_data)
         await ctx.send(f"bạn bán hàng online và kiếm được {earning}$!")
-        save_member_data(message.author.id, member_data)
     else:
         await ctx.send('bạn chỉ được chọn 1 trong 5 nghề trên')
 @bot.event
@@ -329,64 +326,29 @@ async def work_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('bạn đã làm việc quá nhiều rồi, hãy nghỉ ngơi và quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
-async def balance(message, member: discord.User=None):
+async def balance(ctx, member: discord.User=None):
     try:
         if member == None:
-            member_data = load_member_data(message.author.id)
-            embed = discord.Embed(title=f"số tiền của {message.author.display_name}")
-            embed.add_field(name="tiền mặt", value=str(member_data.wallet))
-            embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
-            await message.channel.send(embed=embed)
+            await open_account(ctx.author.id)
+            member_data = await get_bank_data()
+            wallet = member_data[str(ctx.author.id)]['Wallet']
+            bank = member_data[str(ctx.author.id)]["Bank"]
+            embed = discord.Embed(title=f"số tiền của {ctx.author.display_name}")
+            embed.add_field(name="tiền mặt", value=wallet)
+            embed.add_field(name="trong thẻ ngân hàng", value=bank)
+            await ctx.send(embed=embed)
         else:
-            member_data = load_member_data(member.id)
+            await open_account(member.id)
+            member_data = await get_bank_data()
+            wallet = member_data[str(member.id)]["Wallet"]
+            bank = member_data[str(member.id)]["Bank"]
             embed = discord.Embed(title=f"số tiền của {member}")
-            embed.add_field(name="tiền mặt", value=str(member_data.wallet))
-            embed.add_field(name="trong thẻ ngân hàng", value=str(member_data.bank))
-            await message.channel.send(embed=embed)
+            embed.add_field(name="tiền mặt", value=wallet)
+            embed.add_field(name="trong thẻ ngân hàng", value= bank)
+            await ctx.send(embed=embed)
     except Exception as e:
         print(e)
-        await message.channel.send('error')
-@bot.group(invoke_without_command=True)
-async def shop(ctx):
-    await ctx.send('nơi mua bán các vật trong bot\nhãy chọn shop sell(bán đồ) hoặc shop buy(mua đồ)')
-@shop.command()
-async def sell(ctx):
-    await ctx.send('đồ có thể bán\n1. máy tính: 700 tiền\nLưu ý: đây chỉ là lệnh đag thử nghiệm, sẽ update sau')
-    def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1"]
-    message = await bot.wait_for('message', check = check)
-    if(message.content.lower() == "1"):
-        member_data = load_member_data(message.author.id)
-        if member_data.pc == 1:
-            member_data.bank += 700
-            member_data.pc = 0
-            await ctx.send('giao dịch thành công')
-            save_member_data(message.author.id, member_data)
-        else:
-            await ctx.send('bạn bạn không có máy tính để bán')
-    else:
-        await ctx.send('đồ bạn muốn bán không hợp lệ')
-        save_member_data(message.author.id, member_data)
-@shop.command()
-async def buy(ctx):
-    await ctx.send('đồ có thể mua\n1. pc: 1500 tiền,')
-    def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1"]
-    message = await bot.wait_for('message', check = check)
-    if(message.content.lower() == "1"):
-        member_data = load_member_data(message.author.id)
-        if member_data.pc == 1:
-            await ctx.send('bạn đã có pc rồi, mua làm gì nữa')
-        else:
-            if member_data.bank >= 1500:
-                member_data.bank -= 1500
-                member_data.pc = 1
-                await ctx.send('giao dịch thành công')
-                save_member_data(message.author.id, member_data)
-            else:
-                await ctx.send('bạn quá nghèo để mua được máy tính')
-    else:
-        await ctx.send('sai cú pháp, món đồ bạn cần mua không tồn tại')
+        await ctx.send('error')
 @bot.group(invoke_without_command=True)
 async def bank(ctx):
     embed = discord.Embed(title="MIRAI BANK", description="nơi gửi và rút tiền từ ngân hàng", color=0x00ff00)
@@ -397,14 +359,15 @@ async def bank(ctx):
 @bank.command()
 @commands.cooldown(3, 2400, commands.BucketType.user)
 async def withdraw(ctx, arg = None):
-    member_data = load_member_data(ctx.message.author.id)
-    if member_data.bank < int(arg):
+    await open_account(ctx.message.author.id)
+    member_data = await get_bank_data()
+    if member_data[str(ctx.author.id)]["Bank"] < int(arg):
         await ctx.send('m ko đủ số tiền để rút, t ko ngu đâu mà đòi lừa=))')
     elif arg == None:
         await ctx.send('nhập số tiền cần rút')
-    elif member_data.bank >= int(arg):
+    elif member_data[str(ctx.author.id)]["Bank"] >= int(arg):
         await ctx.send(f'đã rút {arg}$ từ tài khoản')
-        update(ctx.message.author.id, arg, 'bank')
+        await update(ctx.message.author.id, arg, 'bank')
 @withdraw.error
 async def withdraw_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
@@ -412,30 +375,33 @@ async def withdraw_error(ctx, error):
 @bank.command(name = "deposit")
 @commands.cooldown(3, 2400, commands.BucketType.user)
 async def deposit(ctx, arg = None):
-    member_data = load_member_data(ctx.message.author.id)
+    await open_account(ctx.message.author.id)
+    member_data = await get_bank_data()
     if arg == None:
         await ctx.send('nhập số tiền cần bỏ vào tài khoản')
-    elif member_data.wallet < int(arg):
+    elif member_data[str(ctx.author.id)]["Wallet"] < int(arg):
         await ctx.send('m ko đủ số tiền để gửi vào tài khoản, t ko ngu đâu mà đòi lừa=))')
-    elif member_data.wallet >= int(arg):
+    elif member_data[str(ctx.author.id)]["Wallet"] >= int(arg):
         await ctx.send(f'đã trừ {arg}$ của ví')
-        update(ctx.message.author.id, arg, 'wallet')
+        await update(ctx.message.author.id, arg, 'wallet')
 @deposit.error
 async def deposit_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('ngân hàng đóng cửa rồi, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bank.command(name = "send")
 async def send(ctx, member: discord.User=None, amount = None):
-    data_send_user = load_member_data(ctx.message.author.id) 
-    data_receive_user = load_member_data(member.id)
+    await open_account(ctx.message.author.id)
+    await open_account(member.id)
+    data_send_user = await get_bank_data() 
+    data_receive_user = await get_bank_data()
     if discord.User == None or amount == None or discord.User == None and amount == None:
         await ctx.send('sai cú pháp')
-    elif data_send_user.bank < int(amount):
+    elif data_send_user[str(ctx.author.id)]["Bank"] < int(amount):
         await ctx.send('không đủ số tiền trong tài khoản để gửi')
     else:
         try:
-            update(ctx.message.author.id, amount, 'send_user')
-            update(member.id, amount, 'receive_user')
+            await update(ctx.message.author.id, amount, 'send_user')
+            await update(member.id, amount, 'receive_user')
             await ctx.send(f'đã chuyển tiền thành công cho {member.mention}')
         except Exception as e:
             print(e)
@@ -452,10 +418,11 @@ async def thinh(ctx):
     await ctx.send(result)
 @bot.command()
 async def keobuabao(ctx, arg1 = None, arg2 = None):
-    member_data = load_member_data(ctx.message.author.id)
+    await open_account(ctx.message.author.id)
+    member_data = await get_bank_data()
     choice = ['kéo', 'búa', 'bao']
     bot = random.choice(choice)
-    if member_data.wallet < int(arg2):
+    if member_data[str(ctx.author.id)]["Wallet"] < int(arg2):
         await ctx.send('ko đủ tiền để chơi')
     else:
         if arg1 == None or arg2 == None or arg1 == None and arg2 == None:
@@ -464,22 +431,22 @@ async def keobuabao(ctx, arg1 = None, arg2 = None):
             await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Hòa')
         elif arg1 == 'bao' and bot == 'búa':
             await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Bạn đã thắng và nhận đươc {arg2}$')
-            update(ctx.message.author.id, arg2, 'keobuabao_win')
+            await update(ctx.message.author.id, arg2, 'keobuabao_win')
         elif arg1 == 'bao' and bot == 'kéo':
             await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
-            update(ctx.message.author.id, arg2, 'keobuabao_lose')
+            await update(ctx.message.author.id, arg2, 'keobuabao_lose')
         elif arg1 == 'kéo' and bot == 'búa':
             await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
-            update(ctx.message.author.id, arg2, 'keobuabao_lose')
+            await update(ctx.message.author.id, arg2, 'keobuabao_lose')
         elif arg1 == 'kéo' and bot == 'bao':
             await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thắng và nhận được {arg2}$')
-            update(ctx.message.author.id, arg2, 'keobuabao_win')
+            await update(ctx.message.author.id, arg2, 'keobuabao_win')
         elif arg1 == 'búa' and bot == 'bao':
             await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thua và mất {arg2}$')
-            update(ctx.message.author.id, arg2, 'keobuabao_lose')
+            await update(ctx.message.author.id, arg2, 'keobuabao_lose')
         elif arg1 == 'búa' and bot == 'kéo':
             await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nKết quả: Bạn đã thắng và nhận được {arg2}$')
-            update(ctx.message.author.id, arg2, 'keobuabao_win')
+            await update(ctx.message.author.id, arg2, 'keobuabao_win')
         else:
             await ctx.send('lỗi')
 @bot.command()
@@ -749,18 +716,20 @@ async def sendnoti(ctx):
 @bot.command()
 @commands.cooldown(1, 86400, commands.BucketType.user)
 async def daily(ctx):
-    member_data = load_member_data(ctx.message.author.id)
-    member_data.wallet += 100
-    save_member_data(ctx.message.author.id, member_data)
-    await ctx.send('nhận thưởng ngày thành công 100$')
+    await open_account(ctx.message.author.id)
+    member_data = await get_bank_data()
+    member_data[str(ctx.message.author.id)]['Wallet'] += 100
+    save_member_data(member_data)
+    await ctx.send('nhận thưởng online thành công 100$')
 @daily.error
 async def daily_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('bạn đã nhận thưởng ngày hôm nay rồi hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
 async def slot(ctx, arg = None):
-    member_data = load_member_data(ctx.message.author.id)
-    if member_data.wallet < int(arg):
+    await open_account(ctx.message.author.id)
+    member_data = await get_bank_data()
+    if member_data[str(ctx.message.author.id)]['Wallet'] < int(arg):
         await ctx.send('tiền cược không hợp lệ')
     else:
         try:
@@ -774,10 +743,10 @@ async def slot(ctx, arg = None):
                 slot = data['data']
                 if data['result'] == "lose":
                     await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thua! {arg}$')
-                    update(ctx.message.author.id, arg, 'keobuabao_lose')
+                    await update(ctx.message.author.id, arg, 'keobuabao_lose')
                 elif data['result'] == "win":
                     await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thắng {arg}$')
-                    update(ctx.message.author.id, arg, 'keobuabao_win')
+                    await update(ctx.message.author.id, arg, 'keobuabao_win')
         except:
             await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
 @bot.command()
@@ -870,52 +839,71 @@ async def dovui(ctx):
     except Exception as e:
         print(e)
         await ctx.send(f'lệnh bạn đang sử dụng đã xảy ra lỗi, hãy báo cáo về admin bằng lệnh {prefix}callad, hoặc câu trả lời của bạn không phải là một con số')
-#Functions
-def load_data():
-    if os.path.isfile(data_filename):
-        with open(data_filename, "rb") as file:
-            return pickle.load(file)
+@bot.command(name = "setmoney")
+async def setmoney(ctx, arg = None, arg2 = None):
+    if arg == None or arg2 == None or arg == None and arg2 == None:
+        await ctx.send('sai cú pháp')
+    elif ctx.message.author.id != 716146182849560598:
+        await ctx.send('bạn không phải admin nên không có quyền sử dụng lệnh này')
     else:
-        return dict()
+        await update(ctx.message.author.id, arg, arg2)
+        await ctx.send('done')
+@bot.command(name = "fishing")
+#Functions
+async def open_account(user):
+    users = await get_bank_data()
 
-def load_member_data(member_ID):
-    data = load_data()
+    if str(user) in users:
+        return False
+    else:
+        users[str(user)] = {}
+        users[str(user)]["Wallet"] = 0
+        users[str(user)]["Bank"] = 0
+        users[str(user)]["pc"] = 0
 
-    if member_ID not in data:
-        return Data(0, 0, 0)
+    with open("data.json", 'w') as f:
+        json.dump(users, f)
 
-    return data[member_ID]
+    return True
 
-def save_member_data(member_ID, member_data):
-    data = load_data()
 
-    data[member_ID] = member_data
-
-    with open(data_filename, "wb") as file:
-        pickle.dump(data, file)
-def update(user, change, mode):
-    member_data = load_member_data(user)
+async def get_bank_data():
+    with open("data.json", 'r') as f:
+        users = json.load(f)
+    return users
+async def update(user, change, mode):
+    await open_account(user)
+    member_data = await get_bank_data()
     if mode == 'wallet':
-        member_data.wallet -= int(change)
-        member_data.bank += int(change)
-        save_member_data(user, member_data)
+        member_data[str(user)]['Wallet'] -= int(change)
+        member_data[str(user)]['Bank'] += int(change)
+        save_member_data(member_data)
     elif mode == 'bank':
-        member_data.wallet += int(change)
-        member_data.bank -= int(change)
-        save_member_data(user, member_data)
+        member_data[str(user)]['Wallet'] += int(change)
+        member_data[str(user)]['Bank'] -= int(change)
+        save_member_data(member_data)
     elif mode == 'keobuabao_win':
-        member_data.wallet += int(change)
-        save_member_data(user, member_data)
+        member_data[str(user)]['Wallet'] += int(change)
+        save_member_data(member_data)
     elif mode == 'keobuabao_lose':
-        member_data.wallet -= int(change)
-        save_member_data(user, member_data)
+        member_data[str(user)]['Wallet'] -= int(change)
+        save_member_data(member_data)
     elif mode == 'receive_user':
-        member_data.bank += int(change)
-        save_member_data(user, member_data)
+        member_data[str(user)]['Bank'] += int(change)
+        save_member_data(member_data)
     elif mode == 'send_user':
-        member_data.bank -= int(change)
-        save_member_data(user, member_data)
+        member_data[str(user)]['Bank'] -= int(change)
+        save_member_data(member_data)
+    elif mode == 'setmoney-wallet':
+        member_data[str(user)]['Wallet'] = int(change)
+        save_member_data(member_data)
+    elif mode == 'setmoney-bank':
+        member_data[str(user)]['Bank'] = int(change)
+        save_member_data(member_data)
     else:
         print('error')
+def save_member_data(data):
+    with open("data.json", 'w') as f:
+        json.dump(data, f)
 bot.run('token')
 #credit: Duc Anh
