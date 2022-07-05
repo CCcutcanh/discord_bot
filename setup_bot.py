@@ -179,7 +179,7 @@ async def weather(ctx, *, arg = None):
     if arg == None:
         await ctx.send('sai cú pháp')
     elif arg != None:
-        url = f'https://api.openweathermap.org/data/2.5/weather?q={arg}&lang=vi&appid=f5e58e5107262dd200ef30cc9e47355a'
+        url = f'https://api.accuweather.com/locations/v1/cities/search.json?q={arg}&apikey=d7e795ae6a0d44aaa8abb1a0a7ac19e4&language=vi-vn'
         image = f'http://mewdev.pro/api/v2/weather?location={arg}&apikey=Meew.90c3759fff62c248ba845561583c76fa'
         get_image = requests.get(image)
         get = requests.get(url)
@@ -187,20 +187,56 @@ async def weather(ctx, *, arg = None):
         data_txt = get.text
         data_json = json.loads(data_txt)
         image_json = json.loads(img_txt)
-        if data_json['cod'] != "404" and image_json['success'] == True:
+        if len(data_json) != 0 and image_json['success'] == True:
             img = requests.get(image_json['data'])
             file = open("weather.png", "wb")
             file.write(img.content)
             file.close()
-            temp_min = data_json['main']['temp_min'] - 273.15
-            temp_max = data_json['main']['temp_max'] - 273.15
-            feel_like = data_json['main']['feels_like'] - 273.15
-            sunrise = datetime.datetime.fromtimestamp(int(data_json['sys']['sunrise']))
-            sunset = datetime.datetime.fromtimestamp(int(data_json['sys']['sunset']))
-            description = data_json['weather'][0]['description']      
-            await ctx.send(f'🌡️nhiệt độ cao nhât - thấp nhất: {temp_max} - {temp_min}\n🌡️nhiệt độ cảm nhận được: {feel_like}\n🌅mặt trời mọc: {sunrise}\n🌄mặt trời lặn: {sunset}\n🗄️mô tả: {description}', file = discord.File('weather.png'))
+            key = data_json[0]['Key']
+            get2 = requests.get(f'http://api.accuweather.com/forecasts/v1/daily/10day/{key}?apikey=d7e795ae6a0d44aaa8abb1a0a7ac19e4&details=true&language=vi')
+            txt2 = get2.text
+            json2 = json.loads(txt2) 
+            temp_min = round((json2['DailyForecasts'][0]['Temperature']['Minimum']['Value'] - 32)/1.8)
+            temp_max = round((json2['DailyForecasts'][0]['Temperature']['Maximum']['Value'] - 32)/1.8)
+            feel_like = round((json2['DailyForecasts'][0]['RealFeelTemperature']['Minimum']['Value'] - 32)/1.8)
+            sunrise = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json2['DailyForecasts'][0]['Sun']['EpochRise']))
+            sunset = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json2['DailyForecasts'][0]['Sun']['EpochSet']))
+            moonrise = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json2['DailyForecasts'][0]['Moon']['EpochRise']))
+            moonset = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json2['DailyForecasts'][0]['Moon']['EpochSet']))
+            day =  json2['DailyForecasts'][0]['Day']['LongPhrase']
+            night = json2['DailyForecasts'][0]['Night']['LongPhrase']
+            description = json2['Headline']['Text']      
+            await ctx.send(f'Thời tiết hôm nay: {description}\n🌡️Nhiệt độ cao nhât - Thấp nhất: {temp_max}°C - {temp_min}°C\n🌡️Nhiệt độ cảm nhận được: {feel_like}°C\n🌅Mặt trời mọc: {sunrise}\n🌄Mặt trời lặn: {sunset}\n🌃Mặt trăng mọc: {moonrise}\n🌃Mặt trăng lặn: {moonset}\n🌞Ban ngày: {day}\n🌞Ban đêm: {night}', file = discord.File('weather.png'))
+        elif len(data_json) != 0 and image_json['success'] == False:
+            try:
+                img = requests.get(f'https://manhict.tech/weather/vietnam?area={arg}&type=text/thoitiet')
+                check = img.text
+                if check == "Không tìm thấy địa điểm này!":
+                    await ctx.send('error')
+                else:
+                    file = open("weather.png", "wb")
+                    file.write(img.content)
+                    file.close()
+                    key = data_json[0]['Key']
+                    get2 = requests.get(f'http://api.accuweather.com/forecasts/v1/daily/10day/{key}?apikey=d7e795ae6a0d44aaa8abb1a0a7ac19e4&details=true&language=vi')
+                    txt2 = get2.text
+                    json2 = json.loads(txt2) 
+                    temp_min = round((json2['DailyForecasts'][0]['Temperature']['Minimum']['Value'] - 32)/1.8)
+                    temp_max = round((json2['DailyForecasts'][0]['Temperature']['Maximum']['Value'] - 32)/1.8)
+                    feel_like = round((json2['DailyForecasts'][0]['RealFeelTemperature']['Minimum']['Value'] - 32)/1.8)
+                    sunrise = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json2['DailyForecasts'][0]['Sun']['EpochRise']))
+                    sunset = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json2['DailyForecasts'][0]['Sun']['EpochSet']))
+                    moonrise = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json2['DailyForecasts'][0]['Moon']['EpochRise']))
+                    moonset = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json2['DailyForecasts'][0]['Moon']['EpochSet']))
+                    day =  json2['DailyForecasts'][0]['Day']['LongPhrase']
+                    night = json2['DailyForecasts'][0]['Night']['LongPhrase']
+                    description = json2['Headline']['Text']      
+                    await ctx.send(f'Thời tiết hôm nay: {description}\n🌡️Nhiệt độ cao nhât - Thấp nhất: {temp_max}°C - {temp_min}°C\n🌡️Nhiệt độ cảm nhận được: {feel_like}°C\n🌅Mặt trời mọc: {sunrise}\n🌄Mặt trời lặn: {sunset}\n🌃Mặt trăng mọc: {moonrise}\n🌃Mặt trăng lặn: {moonset}\n🌞Ban ngày: {day}\n🌞Ban đêm: {night}', file = discord.File('weather.png'))
+            except Exception as e:
+                print(e)
+                await ctx.send('đã xảy ra lỗi không xác định')
         else:
-            await ctx.send('thành phố không tồn tại\nhãy thử viết tên thành phố không dấu, cách giữa hai từ\nví dụ: ?weather ha noi')
+            await ctx.send('error, lỗi chưa xác định')
     print(data_json['cod'])
     print(image_json['success'])
 @bot.command()
