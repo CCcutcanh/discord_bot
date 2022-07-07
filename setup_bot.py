@@ -8,7 +8,6 @@ import random
 import pickle
 import os
 import random
-from googletrans import Translator
 import asyncio
 import wikipedia
 import datetime
@@ -230,7 +229,7 @@ async def weather(ctx, *, arg = None):
                     moonset = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(json2['DailyForecasts'][0]['Moon']['EpochSet']))
                     day =  json2['DailyForecasts'][0]['Day']['LongPhrase']
                     night = json2['DailyForecasts'][0]['Night']['LongPhrase']
-                    description = json2['Headline']['Text']      
+                    description = json2['Headline']['Text']     
                     await ctx.send(f'Thời tiết hôm nay: {description}\n🌡️Nhiệt độ cao nhât - Thấp nhất: {temp_max}°C - {temp_min}°C\n🌡️Nhiệt độ cảm nhận được: {feel_like}°C\n🌅Mặt trời mọc: {sunrise}\n🌄Mặt trời lặn: {sunset}\n🌃Mặt trăng mọc: {moonrise}\n🌃Mặt trăng lặn: {moonset}\n🌞Ban ngày: {day}\n🌞Ban đêm: {night}', file = discord.File('weather.png'))
             except Exception as e:
                 print(e)
@@ -425,6 +424,7 @@ async def deposit_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send('ngân hàng đóng cửa rồi, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bank.command(name = "send")
+@commands.cooldown(3, 2400, commands.BucketType.user)
 async def send(ctx, member: discord.User=None, amount = None):
     await open_account(ctx.message.author.id)
     await open_account(member.id)
@@ -442,6 +442,10 @@ async def send(ctx, member: discord.User=None, amount = None):
         except Exception as e:
             print(e)
             await ctx.send('error')
+@send.error
+async def send_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send('ngân hàng đóng cửa rồi, hãy quay lại sau {:.2f} giây'.format(error.retry_after))
 @bot.command()
 async def thinh(ctx):
     global random, json
@@ -638,15 +642,94 @@ async def taoanhdep(ctx):
     file.close()
     await ctx.send('ảnh của bạn đây:>', file = discord.File('taoanhdep.png'))
 @bot.command()
-async def translate(ctx):
-    await ctx.send('nhập văn bản cần dịch')
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check=check)
-    translator = Translator()
-    translated = translator.translate(f'{message.content.lower()}', src='auto', dest='vi')
- 
-    await ctx.send(translated.text)
+async def translate(ctx, arg = None):
+    if arg == None:
+        await ctx.send('do bạn không nhập ngôn ngữ cần chuyển nên bot sẽ sử dụng ngôn ngữ mặc định (ngôn ngữ gốc -> tiếng anh hoặc ngôn ngữ gốc -> tiếng việt ) nhập văn bản cần dịch')
+        def check(m):
+            return m.author.id == ctx.author.id
+        message = await bot.wait_for('message', check=check)
+        url = "https://google-translate1.p.rapidapi.com/language/translate/v2/detect"
+
+        payload = f"q={message.content.lower()}"
+        headers = {
+            "content-type": "application/x-www-form-urlencoded",
+            "Accept-Encoding": "application/gzip",
+            "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
+            "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
+        }
+
+        response = requests.request("POST", url, data=payload, headers=headers)
+        data = json.loads(response.text)
+        src = data['data']['detections'][0][0]['language']
+        if src == "vi":
+            url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
+
+            payload = f"q={message.content.lower()}&target=en&source=vi"
+            headers = {
+                "content-type": "application/x-www-form-urlencoded",
+                "Accept-Encoding": "application/gzip",
+                "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
+                "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
+            }
+
+            response2 = requests.request("POST", url, data=payload, headers=headers)
+            data = json.loads(response2.text)
+            text = data['data']['translations'][0]['translatedText']
+            await ctx.send(f'kết quả dịch: "{text}"')
+        elif src == "en":
+            url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
+
+            payload = f"q={message.content.lower()}&target=vi&source=en"
+            headers = {
+                "content-type": "application/x-www-form-urlencoded",
+                "Accept-Encoding": "application/gzip",
+                "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
+                "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
+            }
+
+            response3 = requests.request("POST", url, data=payload, headers=headers)
+            data = json.loads(response3.text)
+            text = data['data']['translations'][0]['translatedText']
+            await ctx.send(f'kết quả dịch: "{text}"')
+        else:
+            url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
+
+            payload = f"q={message.content.lower()}&target=vi&source={src}"
+            headers = {
+                "content-type": "application/x-www-form-urlencoded",
+                "Accept-Encoding": "application/gzip",
+                "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
+                "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
+            }
+
+            response3 = requests.request("POST", url, data=payload, headers=headers)
+            data = json.loads(response3.text)
+            text = data['data']['translations'][0]['translatedText']
+            await ctx.send(f'kết quả dịch: "{text}"')
+    else:
+        await ctx.send(f'bạn đã chọn ngôn ngữ cần dịch là "{arg}"\nvui lòng nhập văn bản cần dịch')
+        def check(m):
+            return m.author.id == ctx.author.id
+        message = await bot.wait_for('message', check=check)
+        url = "https://google-translate1.p.rapidapi.com/language/translate/v2/detect"
+
+        payload = f"q={message.content.lower()}"
+        headers = {
+            "content-type": "application/x-www-form-urlencoded",
+            "Accept-Encoding": "application/gzip",
+            "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
+            "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
+        }
+
+        response4 = requests.request("POST", url, data=payload, headers=headers)
+        data = json.loads(response.text)
+        src = data['data']['detections'][0][0]['language']
+        if response4.status_code != 200:
+            await ctx.send('error')
+        elif response4.status_code == 200:
+            data = json.loads(response4.text)
+            text = data['data']['translations'][0]['translatedText']
+            await ctx.send(f'kết quả dịch: "{text}"')
 @bot.command()
 async def caunoihay(ctx):
     sentence = ['Một cách để tận dụng tối đa cuộc sống là xem nó như một cuộc phiêu lưu – William Feather',' Mạnh dạn nói Tôi đã sai là cách ta chấp nhận đối mặt với tình huống khó khăn. Việc đó có phần mạo hiểm nhưng những gì ta nhận được sẽ vượt ngoài sự mong đợi’ - Rich DeVos', 'Tích cực, tự tin và kiên trì là chìa khóa trong cuộc sống. Vì vậy đừng bao giờ từ bỏ chính mình’ – Khalid', 'Yêu tôi hay ghét tôi, cả hai đều có lợi cho tôi. Nếu bạn yêu tôi, tôi sẽ luôn ở trong tim bạn và nếu bạn ghét tôi, tôi sẽ ở trong tâm trí bạn’ – Baland Quandeel', 'Thái độ quan trọng hơn quá khứ, hơn giáo dục, hơn tiền bạc, hơn hoàn cảnh, hơn những gì mọi người làm hoặc nói. Nó quan trọng hơn ngoại hình, năng khiếu hay kỹ năng’ – Charles Swindoll', 'Hãy tin vào chính mình! Có niềm tin vào khả năng của bạn! Nếu không có sự tự tin khiêm tốn nhưng hợp lý vào năng lực của chính mình, bạn không thể thành công hay hạnh phúc’ - Norman Vincent Peale', 'Trong đời người, có hai con đường bằng phẳng không trở ngại: Một là đi tới lý tưởng, một là đi tới cái chết’ - Lev Tolstoy', 'Bạn có thể thay đổi thế giới của mình bằng cách thay đổi lời nói của bạn ... Hãy nhớ rằng, cái chết và sự sống nằm trong sức mạnh của lưỡi’ - Joel Osteen', 'Lạc quan là niềm tin dẫn đến thành tích. Không có gì có thể được thực hiện mà không có hy vọng và sự tự tin’ - Helen Keller', '‘Nếu bạn muốn thành công, bạn nên tìm ra những con đường mới, thay vì đi trên những con đường mòn của sự thành công được chấp nhận’ - John D. Rockefeller', '‘Nếu bạn không thích cái gì đó, hãy thay đổi nó. Nếu bạn không thể thay đổi nó, hãy thay đổi thái độ của bạn’ - Maya Angelou']
@@ -732,7 +815,7 @@ async def wiki(ctx, *, arg = None):
 @bot.command()
 async def callad(ctx, *, arg=None):
     user = await bot.fetch_user("716146182849560598")
-    await user.send(f"báo cáo từ {ctx.message.author}\ntừ nhóm: {ctx.channel.id}\nnội dung: {arg}")
+    await user.send(f"báo cáo từ: {ctx.message.author}\nid: {ctx.message.author.id}\ntừ nhóm: {ctx.channel.id}\nnội dung: {arg}")
     await ctx.send('đã báo cáo về admin thành công')
 @bot.command()
 async def sendnoti(ctx):
@@ -884,7 +967,36 @@ async def setmoney(ctx, arg = None, arg2 = None):
     else:
         await update(ctx.message.author.id, arg, arg2)
         await ctx.send('done')
-@bot.command(name = "fishing")
+@bot.command(name = "google_search")
+async def google_search(ctx, *, arg = None):
+    url = f"https://google-search3.p.rapidapi.com/api/v1/search/q={arg}"
+    headers = {
+            "X-User-Agent": "desktop",
+            "X-Proxy-Location": "VI",
+            "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
+            "X-RapidAPI-Host": "google-search3.p.rapidapi.com"
+        }
+    response = requests.request("GET", url, headers=headers)
+    data = json.loads(response.text)
+    if arg == None:
+        await ctx.send('phần tìm kiếm không được để trống')
+    elif len(data['results']) != 0:
+        url = f"https://google-search3.p.rapidapi.com/api/v1/search/q={arg}"
+        headers = {
+            "X-User-Agent": "desktop",
+            "X-Proxy-Location": "VI",
+            "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
+            "X-RapidAPI-Host": "google-search3.p.rapidapi.com"
+        }
+
+        response = requests.request("GET", url, headers=headers)
+        data = json.loads(response.text)
+        result1_des = data['results'][0]['description']
+        result1_title = data['results'][0]['title']
+        result1_link = data['results'][0]['link']
+        await ctx.send(f'kết quả search google hàng đầu cho từ khóa "{arg}":\n{result1_title}\n-{result1_des}-\nlink: {result1_link}')
+    else:
+        await ctx.send('không có kết quả cho từ khóa bạn nhập')
 #Functions
 async def open_account(user):
     users = await get_bank_data()
