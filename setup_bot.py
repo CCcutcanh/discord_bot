@@ -139,6 +139,8 @@ async def help(ctx, arg = None):
         em = discord.Embed(title = "dovui", description = "game đố vui, không vui thì thôi")
         em.add_field(name = "**cách dùng**", value = f"{prefix}dovui")
         await ctx.send(embed = em)
+    elif arg == 'google_search':
+        em = discord.Embed(title = "google_search", description = "tìm kiếm thông tin trên google")
     else:
         await ctx.send(f'lệnh bạn nhập không tồn tại hoặc do thằng admin lỏl lười làm nên để thế=)). có thể sử dụng {prefix}callad để gọi nó dậy')
     
@@ -707,7 +709,7 @@ async def translate(ctx, arg = None):
             text = data['data']['translations'][0]['translatedText']
             await ctx.send(f'kết quả dịch: "{text}"')
     else:
-        await ctx.send(f'bạn đã chọn ngôn ngữ cần dịch là "{arg}"\nvui lòng nhập văn bản cần dịch')
+        await ctx.send(f'bạn đã chọn ngôn ngữ cần dịch sang là "{arg}"\nvui lòng nhập văn bản cần dịch')
         def check(m):
             return m.author.id == ctx.author.id
         message = await bot.wait_for('message', check=check)
@@ -722,14 +724,27 @@ async def translate(ctx, arg = None):
         }
 
         response4 = requests.request("POST", url, data=payload, headers=headers)
-        data = json.loads(response.text)
+        data = json.loads(response4.text)
         src = data['data']['detections'][0][0]['language']
         if response4.status_code != 200:
             await ctx.send('error')
         elif response4.status_code == 200:
-            data = json.loads(response4.text)
-            text = data['data']['translations'][0]['translatedText']
-            await ctx.send(f'kết quả dịch: "{text}"')
+            url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
+
+            payload = f"q={message.content.lower()}&target={arg}&source={src}"
+            headers = {
+                "content-type": "application/x-www-form-urlencoded",
+                "Accept-Encoding": "application/gzip",
+                "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
+                "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
+            }
+            response5 = requests.request("POST", url, data=payload, headers=headers)
+            if response5.status_code != 200:
+                await ctx.send('lỗi')
+            else:
+                data = json.loads(response5.text)
+                text = data['data']['translations'][0]['translatedText']
+                await ctx.send(f'kết quả dịch: "{text}"')
 @bot.command()
 async def caunoihay(ctx):
     sentence = ['Một cách để tận dụng tối đa cuộc sống là xem nó như một cuộc phiêu lưu – William Feather',' Mạnh dạn nói Tôi đã sai là cách ta chấp nhận đối mặt với tình huống khó khăn. Việc đó có phần mạo hiểm nhưng những gì ta nhận được sẽ vượt ngoài sự mong đợi’ - Rich DeVos', 'Tích cực, tự tin và kiên trì là chìa khóa trong cuộc sống. Vì vậy đừng bao giờ từ bỏ chính mình’ – Khalid', 'Yêu tôi hay ghét tôi, cả hai đều có lợi cho tôi. Nếu bạn yêu tôi, tôi sẽ luôn ở trong tim bạn và nếu bạn ghét tôi, tôi sẽ ở trong tâm trí bạn’ – Baland Quandeel', 'Thái độ quan trọng hơn quá khứ, hơn giáo dục, hơn tiền bạc, hơn hoàn cảnh, hơn những gì mọi người làm hoặc nói. Nó quan trọng hơn ngoại hình, năng khiếu hay kỹ năng’ – Charles Swindoll', 'Hãy tin vào chính mình! Có niềm tin vào khả năng của bạn! Nếu không có sự tự tin khiêm tốn nhưng hợp lý vào năng lực của chính mình, bạn không thể thành công hay hạnh phúc’ - Norman Vincent Peale', 'Trong đời người, có hai con đường bằng phẳng không trở ngại: Một là đi tới lý tưởng, một là đi tới cái chết’ - Lev Tolstoy', 'Bạn có thể thay đổi thế giới của mình bằng cách thay đổi lời nói của bạn ... Hãy nhớ rằng, cái chết và sự sống nằm trong sức mạnh của lưỡi’ - Joel Osteen', 'Lạc quan là niềm tin dẫn đến thành tích. Không có gì có thể được thực hiện mà không có hy vọng và sự tự tin’ - Helen Keller', '‘Nếu bạn muốn thành công, bạn nên tìm ra những con đường mới, thay vì đi trên những con đường mòn của sự thành công được chấp nhận’ - John D. Rockefeller', '‘Nếu bạn không thích cái gì đó, hãy thay đổi nó. Nếu bạn không thể thay đổi nó, hãy thay đổi thái độ của bạn’ - Maya Angelou']
