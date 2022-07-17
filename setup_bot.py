@@ -12,143 +12,178 @@ import asyncio
 import wikipedia
 import datetime
 import time
+import urllib.request
+from discord.utils import find
 from bs4 import BeautifulSoup
-prefix = '/'
-bot = commands.Bot(command_prefix=f'{prefix}')
+baicao_player = []
+baicao_player_ready = []
+baicao_table = False
+def command_prefix(bot, message):
+    with open(r"C:\codde\discord_bot\data.json", 'r') as f:
+        users = json.load(f)
+    prefix = users[str(message.guild.id)]['prefix']
+    return commands.when_mentioned_or(*prefix)(bot, message)
+def get_prefix():
+    with open(r"C:\codde\discord_bot\data.json", 'r') as f:
+        prefix = json.load(f)
+    return prefix
+
+bot = commands.Bot(command_prefix=(command_prefix))
 bot.remove_command("help")
-data_filename = "data.pickle"
-@bot.group(invoke_without_command=True)
-async def help(ctx, arg = None):
-    if arg == None:
-        em = discord.Embed(title = "ℹ️help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot và /help <command> để biết cách sử dụng")
-        em.add_field(name = "**✅other command**", value = "xsmb, covid19, weather, youtube_search, translate, truyentranh, wiki, news")
-        em.add_field(name = "**🎮game command**", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu, slot")
-        em.add_field(name = "**🏵️roleplay command**", value = "balance, bank, work, daily, ")
-        em.add_field(name = "**⚙️system command bot**", value = "help, offbot, ping, callad, sendnoti")
-        em.add_field(name = "**🔫fun command**", value = "thinh, mark, tiki, taoanhdep, shopmaihuong, caunoihay, thayboi")
-        await ctx.send(embed = em)
-    elif arg == 'balance':
-        em = discord.Embed(title = "balance", description = "xem số tiền hiện đang có của bạn")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}balance @mention")
-        await ctx.send(embed = em)
-    elif arg == 'bank':
-        em = discord.Embed(title = "bank", description = "ngân hàng hỗ trợ rút và gửi tiền của bạn")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}bank withdraw <amount>\n{prefix}bank deposit <amount>\n{prefix}bank send <amount> @mention")
-        await ctx.send(embed = em)
-    elif arg == 'callad':
-        em = discord.Embed(title = "callad", description = "báo cáo vấn đề hoặc câu hỏi bạn muốn gửi đến admin")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}callad <vấn đề cần báo cáo>")
-        await ctx.send(embed = em)
-    elif arg == 'caunoihay':
-        em = discord.Embed(title = "caunoihay", description = "random một câu nói của các vĩ nhân:))")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}caunoihay")
-        await ctx.send(embed = em)
-    elif arg == 'covid19':
-        em = discord.Embed(title = "covid19", description = "xem thông tin về dịch bệnh covid 19 tại Việt Nam")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}covid19")
-        await ctx.send(embed = em)
-    elif arg == 'daily':
-        em = discord.Embed(title = "daily", description = "nhận thưởng online mỗi 24H")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}D>")
-        await ctx.send(embed = em)
-    elif arg == 'dhbc':
-        em = discord.Embed(title = "dhbc", description = "game đuổi hình bắt chữ:))")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}dhbc")
-        await ctx.send(embed = em)
-    elif arg == 'keobuabao':
-        em = discord.Embed(title = "keobuabao", description = "game kéo búa bao với bot")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}keobuabao <kéo/búa/bao> <số tiền cược>")
-        await ctx.send(embed = em)
-    elif arg == 'mark':
-        em = discord.Embed(title = "mark", description = "ghép ảnh xàm")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}mark")
-        await ctx.send(embed = em)
-    elif arg == 'news':
-        em = discord.Embed(title = "news", description = "xem tin mới mỗi ngày trên vnexpress")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}news")
-        await ctx.send(embed = em)
-    elif arg == 'noitu':
-        em = discord.Embed(title = "noitu", description = "game nối từ cùng bot")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}noitu")
-        await ctx.send(embed = em)
-    elif arg == 'ping':
-        em = discord.Embed(title = "ping", description = "pong!")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}ping")
-        await ctx.send(embed = em)
-    elif arg == 'play_taixiu':
-        em = discord.Embed(title = "play_taixiu", description = "chơi game tài xỉu trên bot:)")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}play_taixiu <tài/xỉu> <số tiền cược>")
-        await ctx.send(embed = em)
-    elif arg == 'shopmaihuong':
-        em = discord.Embed(title = "shopmaihuong", description = "ghép ảnh xàm")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}shopmaihuong")
-        await ctx.send(embed = em)
-    elif arg == 'slot':
-        em = discord.Embed(title = "slot", description = "game")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}slot <số tiền cược>")
-        await ctx.send(embed = em)
-    elif arg == 'taoanhdep':
-        em = discord.Embed(title = "taoanhdep", description = "ghép ảnh xàm")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}taoanhdep")
-        await ctx.send(embed = em)
-    elif arg == 'thayboi':
-        em = discord.Embed(title = "thayboi", description = "xem bói online:))")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}thayboi")
-        await ctx.send(embed = em)
-    elif arg == 'thinh':
-        em = discord.Embed(title = "thinh", description = "thính")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}thinh")
-        await ctx.send(embed = em)
-    elif arg == 'tiki':
-        em = discord.Embed(title = "tiki", description = "ghép ảnh xàm")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}tiki")
-        await ctx.send(embed = em)
-    elif arg == 'translate':
-        em = discord.Embed(title = "translate", description = "google dịch")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}translate")
-        await ctx.send(embed = em)
-    elif arg == 'truyentranh':
-        em = discord.Embed(title = "truyentranh", description = "xem truyện tranh và tìm những truyện mới nhất trên toptruyen.net và truyentranh24.com")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}truyentranh search <keywword> (tìm truyện)\n{prefix}truyentranh news (xem các truyện mới nhất trên toptruyen.net)")
-        await ctx.send(embed = em)
-    elif arg == 'vuatiengviet':
-        em = discord.Embed(title = "vuatiengviet", description = "chơi vua tiếng việt:0")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}vuatiengviet")
-        await ctx.send(embed = em)
-    elif arg == 'weather ':
-        em = discord.Embed(title = "weather", description = "ghép ảnh xàm")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}weather <location>")
-        await ctx.send(embed = em)
-    elif arg == 'wiki':
-        em = discord.Embed(title = "wiki", description = "tìm kiếm thông tin trên wikipedia")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}wiki <keywword>")
-        await ctx.send(embed = em)
-    elif arg == 'work':
-        em = discord.Embed(title = "work", description = "có làm thì mới có ăn")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}work")
-        await ctx.send(embed = em)
-    elif arg == 'xsmb':
-        em = discord.Embed(title = "xsmb", description = "xem kết quả xổ số miền Bắc")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}xsmb")
-        await ctx.send(embed = em)
-    elif arg == 'youtube_search':
-        em = discord.Embed(title = "youtube_search", description = "tìm video youtube")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}youtube_search <keyword>")
-        await ctx.send(embed = em)
-    elif arg == 'dovui':
-        em = discord.Embed(title = "dovui", description = "game đố vui, không vui thì thôi")
-        em.add_field(name = "**cách dùng**", value = f"{prefix}dovui")
-        await ctx.send(embed = em)
-    elif arg == 'google_search':
-        em = discord.Embed(title = "google_search", description = "tìm kiếm thông tin trên google")
-    else:
-        await ctx.send(f'lệnh bạn nhập không tồn tại hoặc do thằng admin lỏl lười làm nên để thế=)). có thể sử dụng {prefix}callad để gọi nó dậy')
-    
-#run bot
-#client
+@bot.event
+async def on_guild_join(guild):
+    users = get_prefix()
+    users[str(guild.id)] = {}
+    users[str(guild.id)]['prefix'] = '?'
+    with open(r"C:\codde\discord_bot\data.json", 'w') as f:
+        json.dump(users, f)
 @bot.event
 async def on_ready():
     print(f'[CLIENT] client completed')
+@bot.group(invoke_without_command=True)
+async def help(ctx, arg = None):
+    help_prefix = get_prefix()[str(ctx.message.guild.id)]['prefix']
+    if arg == None:
+        em = discord.Embed(title = "ℹ️help", description = "sử dụng /help để biết các lệnh có thể sử dụng trên bot và /help <command> để biết cách sử dụng")
+        em.add_field(name = "**✅other command**", value = "xsmb, covid19, weather, youtube_search, translate, truyentranh, wiki, news, google_search, google_search, videofb")
+        em.add_field(name = "**🎮game command**", value = "dovui, play_taixiu, keobuabao, vuatiengviet, dhbc(đuổi hình bắt chữ), noitu, slot")
+        em.add_field(name = "**🏵️roleplay command**", value = "balance, bank, work, daily, ")
+        em.add_field(name = "**⚙️system command bot**", value = "help, offbot, ping, callad, sendnoti, setprefix")
+        em.add_field(name = "**🔫fun command**", value = "thinh, mark, tiki, taoanhdep, shopmaihuong, caunoihay, thayboi, banner1")
+        await ctx.send(embed = em)
+    elif arg == 'balance':
+        em = discord.Embed(title = "balance", description = "xem số tiền hiện đang có của bạn")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}balance @mention")
+        await ctx.send(embed = em)
+    elif arg == 'bank':
+        em = discord.Embed(title = "bank", description = "ngân hàng hỗ trợ rút và gửi tiền của bạn")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}bank withdraw <amount>\n{get_prefix()[str(ctx.message.guild.id)]['prefix']}bank deposit <amount>\n{get_prefix()[str(ctx.message.guild.id)]['prefix']}bank send <amount> @mention")
+        await ctx.send(embed = em)
+    elif arg == 'callad':
+        em = discord.Embed(title = "callad", description = "báo cáo vấn đề hoặc câu hỏi bạn muốn gửi đến admin")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}callad <vấn đề cần báo cáo>")
+        await ctx.send(embed = em)
+    elif arg == 'caunoihay':
+        em = discord.Embed(title = "caunoihay", description = "random một câu nói của các vĩ nhân:))")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}caunoihay")
+        await ctx.send(embed = em)
+    elif arg == 'covid19':
+        em = discord.Embed(title = "covid19", description = "xem thông tin về dịch bệnh covid 19 tại Việt Nam")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}covid19")
+        await ctx.send(embed = em)
+    elif arg == 'daily':
+        em = discord.Embed(title = "daily", description = "nhận thưởng online mỗi 24H")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}D>")
+        await ctx.send(embed = em)
+    elif arg == 'dhbc':
+        em = discord.Embed(title = "dhbc", description = "game đuổi hình bắt chữ:))")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}dhbc")
+        await ctx.send(embed = em)
+    elif arg == 'keobuabao':
+        em = discord.Embed(title = "keobuabao", description = "game kéo búa bao với bot")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}keobuabao <kéo/búa/bao> <số tiền cược>")
+        await ctx.send(embed = em)
+    elif arg == 'mark':
+        em = discord.Embed(title = "mark", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}mark")
+        await ctx.send(embed = em)
+    elif arg == 'news':
+        em = discord.Embed(title = "news", description = "xem tin mới mỗi ngày trên vnexpress")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}news")
+        await ctx.send(embed = em)
+    elif arg == 'noitu':
+        em = discord.Embed(title = "noitu", description = "game nối từ cùng bot")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}noitu")
+        await ctx.send(embed = em)
+    elif arg == 'ping':
+        em = discord.Embed(title = "ping", description = "pong!")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}ping")
+        await ctx.send(embed = em)
+    elif arg == 'play_taixiu':
+        em = discord.Embed(title = "play_taixiu", description = "chơi game tài xỉu trên bot:)")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}play_taixiu <tài/xỉu> <số tiền cược>")
+        await ctx.send(embed = em)
+    elif arg == 'shopmaihuong':
+        em = discord.Embed(title = "shopmaihuong", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}shopmaihuong")
+        await ctx.send(embed = em)
+    elif arg == 'slot':
+        em = discord.Embed(title = "slot", description = "game")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}slot <số tiền cược>")
+        await ctx.send(embed = em)
+    elif arg == 'taoanhdep':
+        em = discord.Embed(title = "taoanhdep", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}taoanhdep")
+        await ctx.send(embed = em)
+    elif arg == 'thayboi':
+        em = discord.Embed(title = "thayboi", description = "xem bói online:))")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}thayboi")
+        await ctx.send(embed = em)
+    elif arg == 'thinh':
+        em = discord.Embed(title = "thinh", description = "thính")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}thinh")
+        await ctx.send(embed = em)
+    elif arg == 'tiki':
+        em = discord.Embed(title = "tiki", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}tiki")
+        await ctx.send(embed = em)
+    elif arg == 'translate':
+        em = discord.Embed(title = "translate", description = "google dịch")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}translate")
+        await ctx.send(embed = em)
+    elif arg == 'truyentranh':
+        em = discord.Embed(title = "truyentranh", description = "xem truyện tranh và tìm những truyện mới nhất trên toptruyen.net và truyentranh24.com")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}truyentranh search <keywword> (tìm truyện)\n{get_prefix()[str(ctx.message.guild.id)]['prefix']}truyentranh news (xem các truyện mới nhất trên toptruyen.net)")
+        await ctx.send(embed = em)
+    elif arg == 'vuatiengviet':
+        em = discord.Embed(title = "vuatiengviet", description = "chơi vua tiếng việt:0")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}vuatiengviet")
+        await ctx.send(embed = em)
+    elif arg == 'weather ':
+        em = discord.Embed(title = "weather", description = "ghép ảnh xàm")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}weather <location>")
+        await ctx.send(embed = em)
+    elif arg == 'wiki':
+        em = discord.Embed(title = "wiki", description = "tìm kiếm thông tin trên wikipedia")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}wiki <keywword>")
+        await ctx.send(embed = em)
+    elif arg == 'work':
+        em = discord.Embed(title = "work", description = "có làm thì mới có ăn")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}work")
+        await ctx.send(embed = em)
+    elif arg == 'xsmb':
+        em = discord.Embed(title = "xsmb", description = "xem kết quả xổ số miền Bắc")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}xsmb")
+        await ctx.send(embed = em)
+    elif arg == 'youtube_search':
+        em = discord.Embed(title = "youtube_search", description = "tìm video youtube")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}youtube_search <keyword>")
+        await ctx.send(embed = em)
+    elif arg == 'dovui':
+        em = discord.Embed(title = "dovui", description = "game đố vui, không vui thì thôi")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}dovui")
+        await ctx.send(embed = em)
+    elif arg == 'google_search':
+        em = discord.Embed(title = "google_search", description = "tìm kiếm thông tin trên google")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}google_search")
+        await ctx.send(embed = em)
+    elif arg == 'setprefix':
+        em = discord.Embed(title = "setprefix", description = f"set prefix bot cho sever")
+        em.add_field(name = "**cách dùng**", value = f"{help_prefix}setprefix <prefix>")
+        await ctx.send(embed = em)
+    elif arg == 'banner1':
+        em = discord.Embed(title = "banner1", description = f"tạo banner cho riêng bạn")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}banner1")
+        await ctx.send(embed = em)
+    elif arg == 'videofb':
+        em = discord.Embed(title = "videofb", description = f"tải video từ link video facbook (lưu ý: video càng dài tải càng lâu)")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}videofb <link>")
+        await ctx.send(embed = em)
+    else:
+        await ctx.send(f"lệnh bạn nhập không tồn tại hoặc do thằng admin lỏl lười làm nên để thế=)). có thể sử dụng {get_prefix()[str(ctx.message.guild.id)]['prefix']}callad để gọi nó dậy")
+    
+#run bot
+#client
 #covid19
 @bot.command()
 async def covid19(ctx):
@@ -972,7 +1007,7 @@ async def dovui(ctx):
                     await ctx.send(f'bạn đã trả lời sai rồi:(, đáp án đúng là {result}')
     except Exception as e:
         print(e)
-        await ctx.send(f'lệnh bạn đang sử dụng đã xảy ra lỗi, hãy báo cáo về admin bằng lệnh {prefix}callad, hoặc câu trả lời của bạn không phải là một con số')
+        await ctx.send(f"lệnh bạn đang sử dụng đã xảy ra lỗi, hãy báo cáo về admin bằng lệnh {get_prefix()[str(ctx.message.guild.id)]['prefix']}callad, hoặc câu trả lời của bạn không phải là một con số")
 @bot.command(name = "setmoney")
 async def setmoney(ctx, arg = None, arg2 = None):
     if arg == None or arg2 == None or arg == None and arg2 == None:
@@ -1012,10 +1047,72 @@ async def google_search(ctx, *, arg = None):
         await ctx.send(f'kết quả search google hàng đầu cho từ khóa "{arg}":\n{result1_title}\n-{result1_des}-\nlink: {result1_link}')
     else:
         await ctx.send('không có kết quả cho từ khóa bạn nhập')
+@bot.command()
+async def baicao(ctx, arg = None):
+    try:
+        if arg == None:
+            await ctx.send('game bài cào nhiều người chơi\n{prefix}baicao create [create/start/join]')
+        elif baicao_table == False and arg == 'create':
+            baicao_player.append(ctx.message.author.id)
+            baicao_table = True
+        elif baicao_table == True and arg == 'create':
+            await ctx.send('bàn đã được tạo, không thể tạo thêm')
+        elif arg == 'join' and ctx.message.author.id not in baicao_player and baicao_table == True:
+            baicao_player.append(ctx.message.author.id)
+        elif arg == 'join' and ctx.message.author.id in baicao_player:
+            await ctx.send('bạn đã tham gia bàn chơi, không thể tham gia lại')
+        elif arg == 'join' and baicao_table == False:
+            await ctx.send('chưa tạo bàn để có thể chơi')
+        print(baicao_player)
+    except Exception as e:
+        print(e)
+@bot.command()
+async def setprefix(ctx, arg = None):
+    try:
+        users = get_prefix()
+        if arg == None:
+            await ctx.send('nhập prefix cần dổi')
+        else:
+            users[str(ctx.message.guild.id)]['prefix'] = str(arg)
+            with open(r"C:\codde\discord_bot\data.json", 'w') as f:
+                json.dump(users, f)
+            await ctx.send(f'đã thay prefix của sever thành {arg}')
+    except Exception as e:
+        print(e)   
+@bot.command()
+async def banner1(ctx):
+    try:
+        await ctx.send('để tạo ảnh banner, nhập theo mẫu sau:\n<text1> | <text2> | <id>')
+        def check(m):
+            return m.author.id == ctx.author.id
+        message = await bot.wait_for('message', check = check)
+        value = message.content.split(" | ")
+        name = value[0]
+        sub_name = value[1]
+        id_character = value[2]
+        url = f"https://www.nguyenmanh.name.vn/api/fbcover2?name={name}&id={id_character}&subname={sub_name}&apikey=rcwGtaxg"
+        get = requests.get(url)
+        file = open("banner1.png", "wb")
+        file.write(get.content)
+        file.close()
+        await ctx.send('ảnh đây:)', file = discord.File('banner1.png'))
+        print(url)
+    except Exception as e:
+        print(e)
+@bot.command()
+async def videofb(ctx, url = None):
+    if url == None:
+        await ctx.send("Bạn chưa nhập link video facebook cần tải xuống") 
+    else:
+        await ctx.send("đang tải video, vui lòng đợi...")
+        link = f"https://www.nguyenmanh.name.vn/api/fbDL?url={url}&apikey=rcwGtaxg"
+        get = requests.get(link)
+        data = json.loads(get.text)
+        urllib.request.urlretrieve(data['result']['hd'], 'fb_download.mp4') 
+        await ctx.reply('video của bạn đây', file = discord.File('fb_download.mp4'))
 #Functions
 async def open_account(user):
     users = await get_bank_data()
-
     if str(user) in users:
         return False
     else:
@@ -1026,7 +1123,6 @@ async def open_account(user):
 
     with open("data.json", 'w') as f:
         json.dump(users, f)
-
     return True
 
 
