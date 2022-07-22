@@ -1,3 +1,5 @@
+import re
+from socket import timeout
 import discord
 from discord.ext import commands
 import json 
@@ -5,7 +7,6 @@ import os
 import requests
 from youtube_search import YoutubeSearch
 import random
-import pickle
 import os
 import random
 import asyncio
@@ -15,9 +16,6 @@ import time
 import urllib.request
 from discord.utils import find
 from bs4 import BeautifulSoup
-baicao_player = []
-baicao_player_ready = []
-baicao_table = False
 def command_prefix(bot, message):
     with open(r"C:\codde\discord_bot\data.json", 'r') as f:
         users = json.load(f)
@@ -125,7 +123,7 @@ async def help(ctx, arg = None):
         await ctx.send(embed = em)
     elif arg == 'tiki':
         em = discord.Embed(title = "tiki", description = "ghép ảnh xàm")
-        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}tiki")
+        em.add_field(name = "**cách dùng**", value = f"{get_prefix()[str(ctx.message.guild.id)]['prefix']}tiki <name>")
         await ctx.send(embed = em)
     elif arg == 'translate':
         em = discord.Embed(title = "translate", description = "google dịch")
@@ -203,12 +201,45 @@ async def covid19(ctx):
 @bot.command()
 async def xsmb(ctx):
     #xsmb
-    url = 'http://manhict.tech/xsmb'
-    get_data = requests.get(url)
-    x = get_data.text
-    json_xsmb = json.loads(x)
-    data_xsmb = json_xsmb['data']
-    await ctx.send(data_xsmb)
+    try:
+        result = []
+        url = 'https://www.xoso.net/getkqxs/mien-bac.js'
+        get_data = requests.get(url)
+        x = get_data.text
+        soup = BeautifulSoup(x, 'html.parser')
+        for a in soup.find_all(class_ = 'giaidb'):
+            result.append(a.text)
+            print(a.text)
+        for c in soup.find_all(class_ = 'giai1'):
+            result.append(c.text)
+            print(c.text)
+        for d in soup.find_all(class_ = 'giai2'):
+            result.append(d.text)
+            print(d.text)
+        for e in soup.find_all(class_ = 'giai3'):
+            result.append(e.text)
+            print(e.text)
+        for f in soup.find_all(class_ = 'giai4'):
+            result.append(f.text)
+            print(f.text)
+        for g in soup.find_all(class_ = 'giai5'):
+            result.append(g.text)
+            print(g.text)
+        for h in soup.find_all(class_ = 'giai6'):
+            result.append(h.text)
+            print(h.text)
+        for k in soup.find_all(class_ = 'giai7'):
+            result.append(k.text)
+            print(k.text)
+        for l in soup.find_all(class_ = 'ngay'):
+            result.append(l.text)
+            print(l.text)
+        t = '\t'
+        n = '\n'
+        await ctx.send(f'Kết quả xổ số miền Bắc {str(result[8]).strip(f"{t}")}{n}{n}Giải đặc biệt: {str(result[0]).strip(f"{t}")}{n}Giải nhất: {str(result[1]).strip(f"{t}")}{n}Giải nhì: {str(result[2]).strip(f"{t}")}{n}Giải ba: {str(result[3]).strip(f"{t}")}\nGiải tư: {str(result[4]).strip(f"{t}")}{n}Giải năm: {str(result[5]).strip(f"{t}")}{n}Giải sáu: {str(result[6]).strip(f"{t}")}{n}Giải bảy: {str(result[7]).strip(f"{t}")}')
+    except Exception as e:
+        print(e)
+    
 #weather
 @bot.command()
 async def weather(ctx, *, arg = None):
@@ -245,7 +276,7 @@ async def weather(ctx, *, arg = None):
             await ctx.send(f'Thời tiết hôm nay: {description}\n🌡️Nhiệt độ cao nhât - Thấp nhất: {temp_max}°C - {temp_min}°C\n🌡️Nhiệt độ cảm nhận được: {feel_like}°C\n🌅Mặt trời mọc: {sunrise}\n🌄Mặt trời lặn: {sunset}\n🌃Mặt trăng mọc: {moonrise}\n🌃Mặt trăng lặn: {moonset}\n🌞Ban ngày: {day}\n🌞Ban đêm: {night}', file = discord.File('weather.png'))
         elif len(data_json) != 0 and image_json['success'] == False:
             try:
-                img = requests.get(f'https://manhict.tech/weather/vietnam?area={arg}&type=text/thoitiet')
+                img = requests.get(f'https://nguyenmanh.name.vn/api/thoitiet?type=image&query={arg}&apikey=KCL98tNB')
                 check = img.text
                 if check == "Không tìm thấy địa điểm này!":
                     await ctx.send('error')
@@ -276,16 +307,16 @@ async def weather(ctx, *, arg = None):
     print(data_json['cod'])
     print(image_json['success'])
 @bot.command()
-async def youtube_search(ctx):
-    await ctx.send('nhập từ khóa cần tìm kiếm')
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check = check)
-    search = YoutubeSearch('{content}'.format(content = str(message.content)), max_results=5).to_json()
-    search_dict = json.loads(search)
-    for v in search_dict['videos']:
-        result = 'https://www.youtube.com/watch?v=' + v['id'] + " - " + v['title'] + " của kênh " + v['channel']
-        await ctx.send('đây là các kết quả tìm kiếm {result}'.format(result = result))
+async def youtube_search(ctx, arg = None):
+    if arg == None:
+        await ctx.send('bạn chưa nhập từ kháo cần tìm kiếm')
+    else:
+        await ctx.send('nhập từ khóa cần tìm kiếm')
+        search = YoutubeSearch('{content}'.format(content = str(arg)), max_results=5).to_json()
+        search_dict = json.loads(search)
+        for v in search_dict['videos']:
+            result = 'https://www.youtube.com/watch?v=' + v['id'] + " - " + v['title'] + " của kênh " + v['channel']
+            await ctx.send('đây là các kết quả tìm kiếm {result}'.format(result = result))
 @bot.command()
 @commands.is_owner()
 async def offbot(ctx):
@@ -311,20 +342,21 @@ async def play_taixiu(ctx, arg1 = None, arg2 = None):
             data_txt = get.text
             data_json = json.loads(data_txt)
             result = data_json['result']
+            dice = data_json['dice']
             if result == 'xiu':
                 result = 'xỉu'
             elif result == 'tai':
                 result = 'tài'
             if arg1 == None:
                 await ctx.send('hãy cược tài hoặc xỉu')
-            elif arg2 == None or int(arg2) <= 50:
-                await ctx.send('số tiền cược không cược để trống và phải lớn hơn 50$')
+            elif arg2 == None or int(arg2) < 50:
+                await ctx.send('số tiền cược không cược để trống và phải từ 50$ trở lên')
             elif arg1 == result:
                 gif = 'https://media1.giphy.com/media/ckHAdLU2OmY7knUClD/giphy.gif?cid=ecf05e47venaa45nhe4pmfsckgtrjasrpdzs6vtmpvwya6fk&rid=giphy.gif&ct=g'
                 gif2 = 'https://media1.giphy.com/media/g9582DNuQppxC/giphy.gif?cid=ecf05e4743jop5ctofl2a5763ih04tc5b91dfnor287cu5tv&rid=giphy.gif&ct=g'
                 em_load = discord.Embed(colour = ctx.author.color, description = 'đang lắc xúc sắc...')
                 em_load.set_image(url = gif)
-                em_win = discord.Embed(colour = ctx.author.color, description = f'bạn đã thắng kết quả là: {result} và gom về được {arg2}$ tiền thưởng')
+                em_win = discord.Embed(colour = ctx.author.color, description = f'\n{dice[0]} {dice[1]} {dice[2]} | {result} và gom về được {arg2}$ tiền cược')
                 em_win.set_image(url = gif2)
                 await ctx.send(embed = em_load)
                 await asyncio.sleep(3)
@@ -335,7 +367,7 @@ async def play_taixiu(ctx, arg1 = None, arg2 = None):
                 gif2 = 'https://media3.giphy.com/media/l22ysLe54hZP0wubek/giphy.gif?cid=ecf05e47mba9xtd5rurzzo1flalwaqu6znpuld9vm6b2rz13&rid=giphy.gif&ct=g'
                 em_load = discord.Embed(colour = ctx.author.color, description = 'đang lắc xúc sắc...')
                 em_load.set_image(url = gif)
-                em_win = discord.Embed(colour = ctx.author.color, description = f'bạn đã thua, kết quả là: {result} và mất {arg2}$ tiền cược')
+                em_win = discord.Embed(colour = ctx.author.color, description = f'bạn đã thua, kết quả là:\n{dice[0]} {dice[1]} {dice[2]} | {result} và mất {arg2}$ tiền cược')
                 em_win.set_image(url = gif2)
                 await ctx.send(embed = em_load)
                 await asyncio.sleep(3)
@@ -349,47 +381,54 @@ async def play_taixiu(ctx, arg1 = None, arg2 = None):
 @bot.command(name = "work")
 @commands.cooldown(1, 3600, commands.BucketType.user)
 async def work(ctx):
-    await ctx.send('đây là các việc bạn có thể làm để kiếm tiền\n1. bán vé số\n2. sửa xe\n3. lập trình\n4. thợ hồ\n5. bán hàng online')
+    send = await ctx.send('đây là các việc bạn có thể làm để kiếm tiền\n1. bán vé số\n2. sửa xe\n3. lập trình\n4. thợ hồ\n5. bán hàng online\n6. Đứng đường:))\nreply tin nhắn theo số thứ tự để chọn việc muốn làm')
     def check(m):
-            return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ["1", "2", "3", "4", "5"]
-    message = await bot.wait_for('message', check = check)
-    if message.content.lower() == "1":
+            return m.author == ctx.author and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
+    message = await bot.wait_for('message', check = check, timeout=45)
+    if str(message.content.lower()) == "1":
         await open_account(message.author.id)
         member_data = await get_bank_data()
         earning = random.randrange(301)
-        member_data[str(ctx.author.id)]['Bank'] += earning
+        member_data[str(ctx.author.id)]['Wallet'] += earning
         await ctx.send(f"bạn bán vé số và kiếm được {earning}$!")
         save_member_data(member_data)
-    elif message.content.lower() == "2":
+    elif str(message.content.lower()) == "2":
         await open_account(message.author.id)
         member_data = await get_bank_data()
         earning = random.randrange(301)
-        member_data[str(ctx.author.id)]['Bank'] += earning
+        member_data[str(ctx.author.id)]['Wallet'] += earning
         await ctx.send(f"bạn làm thợ sửa xe và kiếm được {earning}$!")
         save_member_data(member_data)
-    elif message.content.lower() == "3":
+    elif str(message.content.lower()) == "3":
         await open_account(message.author.id)
         member_data = await get_bank_data()
         earning = random.randrange(301)
-        member_data[str(ctx.author.id)]['Bank'] += earning
+        member_data[str(ctx.author.id)]['Wallet'] += earning
         save_member_data(member_data)
         await ctx.send(f"bạn làm lập trình viên và kiếm được {earning}$!")
-    elif message.content.lower() == "4":
+    elif str(message.content.lower()) == "4":
         await open_account(message.author.id)
         member_data = await get_bank_data()
         earning = random.randrange(301)
-        member_data[str(ctx.author.id)]['Bank'] += earning
+        member_data[str(ctx.author.id)]['Wallet'] += earning
         save_member_data(member_data)
         await ctx.send(f"bạn làm thợ hồ và kiếm được {earning}$!")
-    elif message.content.lower() == "5":
+    elif str(message.content.lower()) == "5":
+        await open_account(message.author.id)
+        member_data = await get_bank_data()
+        earning = random.randrange(301)
+        member_data[str(ctx.author.id)]['Wallet'] += earning
+        save_member_data(member_data)
+        await ctx.send(f"bạn bán hàng online và kiếm được {earning}$!")
+    elif str(message.content.lower()) == "6":
         await open_account(message.author.id)
         member_data = await get_bank_data()
         earning = random.randrange(301)
         member_data[str(ctx.author.id)]['Bank'] += earning
         save_member_data(member_data)
-        await ctx.send(f"bạn bán hàng online và kiếm được {earning}$!")
+        await ctx.send(f"bạn được một anh đẹp trai gọi và kiếm được {earning}$!")
     else:
-        await ctx.send('bạn chỉ được chọn 1 trong 5 nghề trên')
+        await ctx.send('bạn chỉ được chọn 1 trong 6 nghề trên')
 @bot.event
 async def on_command_error(ctx, error):
     pass
@@ -497,14 +536,14 @@ async def thinh(ctx):
 async def keobuabao(ctx, arg1 = None, arg2 = None):
     await open_account(ctx.message.author.id)
     member_data = await get_bank_data()
-    choice = ['kéo', 'búa', 'bao']
+    choice = ['kéo', 'búa', 'bao', 'kéo', 'búa', 'bao']
     bot = random.choice(choice)
-    if member_data[str(ctx.author.id)]["Wallet"] < int(arg2):
+    if arg1 == None or arg2 == None or arg1 == None and arg2 == None:
+            await ctx.send('sai cú pháp')
+    elif member_data[str(ctx.author.id)]["Wallet"] < int(arg2):
         await ctx.send('ko đủ tiền để chơi')
     else:
-        if arg1 == None or arg2 == None or arg1 == None and arg2 == None:
-            await ctx.send('sai cú pháp')
-        elif arg1 == bot:
+        if arg1 == bot:
             await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Hòa')
         elif arg1 == 'bao' and bot == 'búa':
             await ctx.send(f'[kéo búa bao]\nbot chọn: {bot}\nbạn chọn: {arg1}\nkết quả: Bạn đã thắng và nhận đươc {arg2}$')
@@ -537,51 +576,69 @@ async def vuatiengviet(ctx):
         file = open("vuatiengviet.png", "wb")
         file.write(get_vuatiengviet.content)
         file.close()
-        await ctx.send('đây là câu hỏi của bạn', file = discord.File('vuatiengviet.png'))
+        send = await ctx.send('đây là câu hỏi của bạn\nreply tin nhắn này để trả lời câu hỏi, bạn có 45 giây để trả lời', file = discord.File('vuatiengviet.png'))
         if " " in random_word_vuatiengviet:
             def check(m):
-                return m.author.id == ctx.author.id
-            message = await bot.wait_for('message', check=check)
-            if message.content.lower() == random_word_vuatiengviet:
-                await ctx.send(f'bạn đã trả lời đúng, đáp án là "{random_word_vuatiengviet}"')
-            else:
-                await ctx.send(f'sai rồi đáp án là "{random_word_vuatiengviet}"')
+                return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
+            try:
+                async with timeout(45):
+                    while True:
+                        message = await bot.wait_for('message', check=check)
+                        if message:
+                            if message.content.lower() == random_word_vuatiengviet:
+                                await ctx.send(f'bạn đã trả lời đúng, đáp án là "{random_word_vuatiengviet}"')
+                            else:
+                                await ctx.send(f'sai rồi đáp án là "{random_word_vuatiengviet}"')
+            except asyncio.TimeoutError:
+                await ctx.send('Hết giờ!')
     except:
-        await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
+        await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. Xin lỗi vì sự cố này')
 @bot.command()
 async def mark(ctx):
+    await ctx.send('lệnh bạn sử dụng hiện đang gặp lỗi, hãy báo cáo về admin bằng lệnh callad để được sửa sớm nhất')
+@bot.command()
+async def Phubcmt(ctx):
     try:
-        await ctx.send('nhập điều bạn muốn ghi')
+        send = await ctx.send('reply tin nhắn này và các nhập thông tin cần thiết theo mẫu sau:\n<text> | <username> | <uid (4 -> ∞)>')
         def check(m):
-            return m.author.id == ctx.author.id
+            return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
         message = await bot.wait_for('message', check=check)
-        url_mark = 'http://manhict.tech/markcmt?text='
-        full_url_mark = url_mark + str(message.content)
-        get_mark = requests.get(full_url_mark)
-        file = open("mark.png", "wb")
-        file.write(get_mark.content)
-        file.close()
-        await ctx.send('ảnh đây:)', file = discord.File('mark.png'))
+        split = message.content.lower().split(' | ')
+        if len(split) != 3:
+            await ctx.send('lỗi, nhập thiếu thông tin')
+        else:
+            url_mark = f"https://manhict.tech/api/phubcmt?text={split[0]}&uid={split[2]}&name={split[1]}&apikey=KCL98tNB"
+            get = requests.get(url_mark)
+            if get.status_code != 200:
+                await ctx.send('lỗi')
+            else:
+                file = open("mark.png", "wb")
+                file.write(get.content)
+                file.close()
+                await ctx.send('ảnh đây:)', file = discord.File('mark.png'))
     except:
         await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
 @bot.command()
-async def tiki(ctx):
-    await ctx.send('nhập tên bạn vào đây (không nên để dấu)')
-    def check(m):
-        return m.author.id == ctx.author.id
-    message = await bot.wait_for('message', check=check)
-    url_tiki = 'https://api.phamvandien.xyz/tiki?text='
-    full_url_tiki = url_tiki + str(message.content)
-    get_tiki = requests.get(full_url_tiki)
-    file = open("tiki.png", "wb")
-    file.write(get_tiki.content)
-    file.close()
-    await ctx.send('ảnh đây:)', file = discord.File('tiki.png'))
+async def tiki(ctx,*,arg = None):
+    help_prefix = get_prefix()[str(ctx.message.guild.id)]['prefix']
+    if arg == None:
+        await ctx.send(f"bạn chưa nhập tên mình vào\n{help_prefix}tiki <name>")
+    else:
+        url_tiki = 'https://api.phamvandien.xyz/tiki?text='
+        full_url_tiki = url_tiki + str(arg)
+        get_tiki = requests.get(full_url_tiki)
+        if get_tiki.status_code != 200:
+            await ctx.send("lỗi")
+        else:
+            file = open("tiki.png", "wb")
+            file.write(get_tiki.content)
+            file.close()
+            await ctx.send('ảnh đây:)', file = discord.File('tiki.png'))
 @bot.command()
 async def dhbc(ctx):
     global random
     try:
-        url_DHBC = ['https://goatbot.tk/api/duoihinhbatchu', 'https://api.phamvandien.xyz/game/dhbcv1', 'https://www.nguyenmanh.name.vn/api/dhbc1?apikey=rcwGtaxg']
+        url_DHBC = ['https://goatbot.tk/api/duoihinhbatchu', 'https://api.phamvandien.xyz/game/dhbcv1', 'https://www.nguyenmanh.name.vn/api/dhbc1?apikey=KCL98tNB']
         random_dhbc = random.choice(url_DHBC)
         get_DHBC = requests.get(random_dhbc)
         data_DHBC = get_DHBC.text
@@ -594,10 +651,10 @@ async def dhbc(ctx):
             file = open("DHBC.png", "wb")
             file.write(get_image_DHBC.content)
             file.close()
-            await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
+            send = await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này có {sokt} chữ', file = discord.File('DHBC.png'))
             if "g" in random_dhbc:
                 def check(m):
-                    return m.author.id == ctx.author.id
+                    return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
                 message = await bot.wait_for('message', check=check)
                 if str(message.content.upper()) == dapan:
                     await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
@@ -611,16 +668,16 @@ async def dhbc(ctx):
             file = open("DHBC.png", "wb")
             file.write(get_image_DHBC.content)
             file.close()
-            await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này là {sokt}', file = discord.File('DHBC.png'))
+            send = await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này là {sokt}', file = discord.File('DHBC.png'))
             if "a" in random_dhbc:
                 def check(m):
-                    return m.author.id == ctx.author.id
+                    return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
                 message = await bot.wait_for('message', check=check)
                 if str(message.content.lower()) == dapan:
                     await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
                 else:
                     await ctx.send(f'sai rồi, đáp án là {dapan}')
-        elif random_dhbc == 'https://www.nguyenmanh.name.vn/api/dhbc1?apikey=rcwGtaxg':
+        elif random_dhbc == 'https://www.nguyenmanh.name.vn/api/dhbc1?apikey=KCL98tNB':
             image_DHBC = json_DHBC['result']['link'] 
             sokt = json_DHBC['result']['sokitu']
             dapan = json_DHBC['result']['tukhoa']
@@ -628,10 +685,10 @@ async def dhbc(ctx):
             file = open("DHBC.png", "wb")
             file.write(get_image_DHBC.content)
             file.close()
-            await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này là {sokt}', file = discord.File('DHBC.png'))
+            send = await ctx.send(f'====ĐUỔI HÌNH BẮT CHỮ====\nđây là câu hỏi của bạn\ngợi ý: từ này là {sokt}', file = discord.File('DHBC.png'))
             if "a" in random_dhbc:
                 def check(m):
-                    return m.author.id == ctx.author.id
+                    return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
                 message = await bot.wait_for('message', check=check)
                 if str(message.content.lower()) == dapan:
                     await ctx.send(f'bạn đã trả lời đúng, đáp án là: {dapan}')
@@ -663,9 +720,9 @@ async def noitu(ctx):
             await ctx.send(word_noitu)
 @bot.command()
 async def taoanhdep(ctx):
-    await ctx.send('nhập để tạo ảnh theo mẫu sau:\n<id nhân vật> | <chữ nền> | <chữ kí>')
+    send = await ctx.send('reply tin nhắn này và nhập để tạo ảnh theo mẫu sau:\n<id nhân vật> | <chữ nền> | <chữ kí>')
     def check(m):
-        return m.author.id == ctx.author.id
+        return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
     message = await bot.wait_for('message', check=check)
     url_taoanhdep = 'https://goatbot.tk/taoanhdep/avataranime?apikey=ntkhangGoatBot'
     value = message.content.lower().split(" | ")
@@ -680,14 +737,10 @@ async def taoanhdep(ctx):
     await ctx.send('ảnh của bạn đây:>', file = discord.File('taoanhdep.png'))
 @bot.command()
 async def translate(ctx, arg = None):
-    if arg == None:
-        await ctx.send('do bạn không nhập ngôn ngữ cần chuyển nên bot sẽ sử dụng ngôn ngữ mặc định (ngôn ngữ gốc -> tiếng anh hoặc ngôn ngữ gốc -> tiếng việt ) nhập văn bản cần dịch')
-        def check(m):
-            return m.author.id == ctx.author.id
-        message = await bot.wait_for('message', check=check)
+    if arg:
         url = "https://google-translate1.p.rapidapi.com/language/translate/v2/detect"
 
-        payload = f"q={message.content.lower()}"
+        payload = f"q={str(arg)}"
         headers = {
             "content-type": "application/x-www-form-urlencoded",
             "Accept-Encoding": "application/gzip",
@@ -701,7 +754,7 @@ async def translate(ctx, arg = None):
         if src == "vi":
             url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
 
-            payload = f"q={message.content.lower()}&target=en&source=vi"
+            payload = f"q={str(arg)}&target=en&source=vi"
             headers = {
                 "content-type": "application/x-www-form-urlencoded",
                 "Accept-Encoding": "application/gzip",
@@ -716,7 +769,7 @@ async def translate(ctx, arg = None):
         elif src == "en":
             url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
 
-            payload = f"q={message.content.lower()}&target=vi&source=en"
+            payload = f"q={str(arg)}&target=vi&source=en"
             headers = {
                 "content-type": "application/x-www-form-urlencoded",
                 "Accept-Encoding": "application/gzip",
@@ -731,7 +784,7 @@ async def translate(ctx, arg = None):
         else:
             url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
 
-            payload = f"q={message.content.lower()}&target=vi&source={src}"
+            payload = f"q={str(arg)}&target=vi&source={src}"
             headers = {
                 "content-type": "application/x-www-form-urlencoded",
                 "Accept-Encoding": "application/gzip",
@@ -744,42 +797,7 @@ async def translate(ctx, arg = None):
             text = data['data']['translations'][0]['translatedText']
             await ctx.send(f'kết quả dịch: "{text}"')
     else:
-        await ctx.send(f'bạn đã chọn ngôn ngữ cần dịch sang là "{arg}"\nvui lòng nhập văn bản cần dịch')
-        def check(m):
-            return m.author.id == ctx.author.id
-        message = await bot.wait_for('message', check=check)
-        url = "https://google-translate1.p.rapidapi.com/language/translate/v2/detect"
-
-        payload = f"q={message.content.lower()}"
-        headers = {
-            "content-type": "application/x-www-form-urlencoded",
-            "Accept-Encoding": "application/gzip",
-            "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
-            "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
-        }
-
-        response4 = requests.request("POST", url, data=payload, headers=headers)
-        data = json.loads(response4.text)
-        src = data['data']['detections'][0][0]['language']
-        if response4.status_code != 200:
-            await ctx.send('error')
-        elif response4.status_code == 200:
-            url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
-
-            payload = f"q={message.content.lower()}&target={arg}&source={src}"
-            headers = {
-                "content-type": "application/x-www-form-urlencoded",
-                "Accept-Encoding": "application/gzip",
-                "X-RapidAPI-Key": "084e013269msh51bb766925d9cb1p188f2fjsn2ff8a09c96fd",
-                "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
-            }
-            response5 = requests.request("POST", url, data=payload, headers=headers)
-            if response5.status_code != 200:
-                await ctx.send('lỗi')
-            else:
-                data = json.loads(response5.text)
-                text = data['data']['translations'][0]['translatedText']
-                await ctx.send(f'kết quả dịch: "{text}"')
+        await ctx.send("bạn chưa nhập câu cần dịch")
 @bot.command()
 async def caunoihay(ctx):
     sentence = ['Một cách để tận dụng tối đa cuộc sống là xem nó như một cuộc phiêu lưu – William Feather',' Mạnh dạn nói Tôi đã sai là cách ta chấp nhận đối mặt với tình huống khó khăn. Việc đó có phần mạo hiểm nhưng những gì ta nhận được sẽ vượt ngoài sự mong đợi’ - Rich DeVos', 'Tích cực, tự tin và kiên trì là chìa khóa trong cuộc sống. Vì vậy đừng bao giờ từ bỏ chính mình’ – Khalid', 'Yêu tôi hay ghét tôi, cả hai đều có lợi cho tôi. Nếu bạn yêu tôi, tôi sẽ luôn ở trong tim bạn và nếu bạn ghét tôi, tôi sẽ ở trong tâm trí bạn’ – Baland Quandeel', 'Thái độ quan trọng hơn quá khứ, hơn giáo dục, hơn tiền bạc, hơn hoàn cảnh, hơn những gì mọi người làm hoặc nói. Nó quan trọng hơn ngoại hình, năng khiếu hay kỹ năng’ – Charles Swindoll', 'Hãy tin vào chính mình! Có niềm tin vào khả năng của bạn! Nếu không có sự tự tin khiêm tốn nhưng hợp lý vào năng lực của chính mình, bạn không thể thành công hay hạnh phúc’ - Norman Vincent Peale', 'Trong đời người, có hai con đường bằng phẳng không trở ngại: Một là đi tới lý tưởng, một là đi tới cái chết’ - Lev Tolstoy', 'Bạn có thể thay đổi thế giới của mình bằng cách thay đổi lời nói của bạn ... Hãy nhớ rằng, cái chết và sự sống nằm trong sức mạnh của lưỡi’ - Joel Osteen', 'Lạc quan là niềm tin dẫn đến thành tích. Không có gì có thể được thực hiện mà không có hy vọng và sự tự tin’ - Helen Keller', '‘Nếu bạn muốn thành công, bạn nên tìm ra những con đường mới, thay vì đi trên những con đường mòn của sự thành công được chấp nhận’ - John D. Rockefeller', '‘Nếu bạn không thích cái gì đó, hãy thay đổi nó. Nếu bạn không thể thay đổi nó, hãy thay đổi thái độ của bạn’ - Maya Angelou']
@@ -839,9 +857,9 @@ async def news(ctx):
 @bot.command()
 async def shopmaihuong(ctx):
     try:
-        await ctx.send('nhập tin nhắn để tạo ảnh theo mẫu sau:\ntext1 | text2')
+        send = await ctx.send('reply tin nhắn này và nhập tin nhắn để tạo ảnh theo mẫu sau:\ntext1 | text2')
         def check(m):
-            return m.author.id == ctx.author.id
+            return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
         message = await bot.wait_for('message', check=check)
         value = message.content.lower().split(" | ")
         text1 = str(value[0])
@@ -864,14 +882,17 @@ async def wiki(ctx, *, arg = None):
         await ctx.send(result)
 @bot.command()
 async def callad(ctx, *, arg=None):
-    user = await bot.fetch_user("716146182849560598")
-    await user.send(f"báo cáo từ: {ctx.message.author}\nid: {ctx.message.author.id}\ntừ nhóm: {ctx.channel.id}\nnội dung: {arg}")
-    await ctx.send('đã báo cáo về admin thành công')
+    if arg == None:
+        await ctx.send(f"Bạn chưa nhập thông tin muốn báo cáo về admin\n{get_prefix()[str(ctx.message.guild.id)]['prefix']}callad <báo cáo>")
+    else:
+        user = await bot.fetch_user("716146182849560598")
+        await user.send(f"báo cáo từ: {ctx.message.author}\nid: {ctx.message.author.id}\ntừ nhóm: {ctx.channel.id}\nnội dung: {arg}")
+        await ctx.send('đã báo cáo về admin thành công')
 @bot.command()
 async def sendnoti(ctx):
-    await ctx.send('nhập theo mẫu sau:\n<id channel> | phản hồi user | phản hồi channel | <id user>')
+    send = await ctx.send('reply tin nhắn này và nhập theo mẫu sau:\n<id channel> | phản hồi user | phản hồi channel | <id user>')
     def check(m):
-        return m.author.id == ctx.author.id
+        return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
     message = await bot.wait_for('message', check=check)
     value = message.content.lower().split(" | ")
     id_channel = str(value[0])
@@ -898,25 +919,27 @@ async def daily_error(ctx, error):
 async def slot(ctx, arg = None):
     await open_account(ctx.message.author.id)
     member_data = await get_bank_data()
-    if member_data[str(ctx.message.author.id)]['Wallet'] < int(arg):
-        await ctx.send('tiền cược không hợp lệ')
+    if arg == None:
+        await ctx.send('Bạn chưa nhập số tiền muốn cược')
+    elif 10 > int(arg):
+        await ctx.send('tiền cược không được để trống và phải từ 10$ trở lên')
+    elif member_data[str(ctx.message.author.id)]['Wallet'] < int(arg):
+        await ctx.send('bạn không có đủ số tiền để chơi')
     else:
         try:
-            if int(arg) == None:
-                await ctx.send('sai cú pháp')
+            random_icon = ['🥑', '🍐', '🥭', '🍎']
+            result = []
+            for i in range(3):
+                random_result = random.choice(random_icon)
+                result.append(random_result)
+            if result[0] == result[1] or result[0] == result[2] or result[1] == result[0] or result[1] == result[2] or result[2] == result[0] or result[2] == result[1] or result[1] == result[2] == result[0]:
+                await ctx.send(f'Kết quả\n\n🕹️{result[0]} | {result[1]} | {result[2]}🕹️\n\nBạn đã thắng!')
+                await update(ctx.message.author.id, arg, 'keobuabao_win')
             else:
-                url = 'https://manhict.tech/game/slot'
-                get = requests.get(url)
-                data_txt = get.text
-                data = json.loads(data_txt)
-                slot = data['data']
-                if data['result'] == "lose":
-                    await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thua! {arg}$')
-                    await update(ctx.message.author.id, arg, 'keobuabao_lose')
-                elif data['result'] == "win":
-                    await ctx.send(f'====SLOT====\nkết quả: {slot}\nBạn đã thắng {arg}$')
-                    await update(ctx.message.author.id, arg, 'keobuabao_win')
-        except:
+                await ctx.send(f'Kết quả\n\n🕹️{result[0]} | {result[1]} | {result[2]}🕹️\n\nBạn thua rồi!:(')
+                await update(ctx.message.author.id, arg, 'keobuabao_lose')
+        except Exception as e:
+            print(e)
             await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. xin lỗi vì sự cố này')
 @bot.command()
 async def news(ctx):
@@ -936,7 +959,7 @@ async def news(ctx):
 @bot.command()
 async def dovui(ctx):
     try:
-        get = requests.get('https://www.nguyenmanh.name.vn/api/dovui2?apikey=rcwGtaxg')
+        get = requests.get('https://www.nguyenmanh.name.vn/api/dovui2?apikey=KCL98tNB')
         data_txt = get.text
         data_json = json.loads(data_txt)
         question = data_json['result']['question']
@@ -946,9 +969,9 @@ async def dovui(ctx):
             option1 = data_json['result']['option'][0]
             option2 = data_json['result']['option'][1]
             option3 = data_json['result']['option'][2]
-            await ctx.send(f'{question}\n1. {option1}\n2. {option2}\n3. {option3}\nTrả lời theo số thứ tự các đáp')
+            send = await ctx.send(f'{question}\n1. {option1}\n2. {option2}\n3. {option3}\nReply tin nhắn này và trả lời theo số thứ tự các đáp')
             def check(m):
-                return m.author.id == ctx.author.id
+                return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
             message = await bot.wait_for('message', check=check)
             if int(message.content.lower()) == result:
                 if result == 1:
@@ -975,9 +998,9 @@ async def dovui(ctx):
             option2 = data_json['result']['option'][1]
             option3 = data_json['result']['option'][2]
             option4 = data_json['result']['option'][3]
-            await ctx.send(f'{question}\n1. {option1}\n2. {option2}\n3. {option3}\n4. {option4}\nTrả lời theo số thứ tự các đáp')
+            send = await ctx.send(f'{question}\n1. {option1}\n2. {option2}\n3. {option3}\n4. {option4}\nReply tin nhắn này và trả lời theo số thứ tự các đáp')
             def check(m):
-                return m.author.id == ctx.author.id
+                return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
             message = await bot.wait_for('message', check=check)
             if int(message.content.lower()) == result:
                 if result == 1:
@@ -1048,25 +1071,6 @@ async def google_search(ctx, *, arg = None):
     else:
         await ctx.send('không có kết quả cho từ khóa bạn nhập')
 @bot.command()
-async def baicao(ctx, arg = None):
-    try:
-        if arg == None:
-            await ctx.send('game bài cào nhiều người chơi\n{prefix}baicao create [create/start/join]')
-        elif baicao_table == False and arg == 'create':
-            baicao_player.append(ctx.message.author.id)
-            baicao_table = True
-        elif baicao_table == True and arg == 'create':
-            await ctx.send('bàn đã được tạo, không thể tạo thêm')
-        elif arg == 'join' and ctx.message.author.id not in baicao_player and baicao_table == True:
-            baicao_player.append(ctx.message.author.id)
-        elif arg == 'join' and ctx.message.author.id in baicao_player:
-            await ctx.send('bạn đã tham gia bàn chơi, không thể tham gia lại')
-        elif arg == 'join' and baicao_table == False:
-            await ctx.send('chưa tạo bàn để có thể chơi')
-        print(baicao_player)
-    except Exception as e:
-        print(e)
-@bot.command()
 async def setprefix(ctx, arg = None):
     try:
         users = get_prefix()
@@ -1082,34 +1086,129 @@ async def setprefix(ctx, arg = None):
 @bot.command()
 async def banner1(ctx):
     try:
-        await ctx.send('để tạo ảnh banner, nhập theo mẫu sau:\n<text1> | <text2> | <id>')
+        send = await ctx.send('reply tin nhắn này, để tạo ảnh banner, nhập theo mẫu sau:\n<text1> | <text2> | <id>')
         def check(m):
-            return m.author.id == ctx.author.id
+            if m.reference is not None:
+                if m.reference.message_id == send.id and m.author.id == ctx.author.id:
+                    return True 
         message = await bot.wait_for('message', check = check)
         value = message.content.split(" | ")
         name = value[0]
         sub_name = value[1]
         id_character = value[2]
-        url = f"https://www.nguyenmanh.name.vn/api/fbcover2?name={name}&id={id_character}&subname={sub_name}&apikey=rcwGtaxg"
+        url = f"https://www.nguyenmanh.name.vn/api/fbcover2?name={name}&id={id_character}&subname={sub_name}&apikey=KCL98tNB"
         get = requests.get(url)
-        file = open("banner1.png", "wb")
-        file.write(get.content)
-        file.close()
-        await ctx.send('ảnh đây:)', file = discord.File('banner1.png'))
-        print(url)
+        if get.status_code == 200:
+            file = open("banner1.png", "wb")
+            file.write(get.content)
+            file.close()
+            await ctx.send('ảnh đây:)', file = discord.File('banner1.png'))
+        else:
+            await ctx.send('lệnh bạn sử dụng hiện đang bị lỗi, hãy báo cóa lên admin để được sửa sớm nhất')
     except Exception as e:
         print(e)
+        await ctx.send('lỗi')
 @bot.command()
 async def videofb(ctx, url = None):
-    if url == None:
-        await ctx.send("Bạn chưa nhập link video facebook cần tải xuống") 
-    else:
-        await ctx.send("đang tải video, vui lòng đợi...")
-        link = f"https://www.nguyenmanh.name.vn/api/fbDL?url={url}&apikey=rcwGtaxg"
-        get = requests.get(link)
-        data = json.loads(get.text)
-        urllib.request.urlretrieve(data['result']['hd'], 'fb_download.mp4') 
-        await ctx.reply('video của bạn đây', file = discord.File('fb_download.mp4'))
+    try:
+        if url == None:
+            await ctx.send("Bạn chưa nhập link video facebook cần tải xuống") 
+        else:
+            await ctx.send("đang tải video, vui lòng đợi...")
+            link = f"https://www.nguyenmanh.name.vn/api/fbDL?url={url}&apikey=KCL98tNB"
+            get = requests.get(link)
+            data = json.loads(get.text)
+            urllib.request.urlretrieve(data['result']['hd'], 'fb_download.mp4') 
+            await ctx.reply('video của bạn đây', file = discord.File('fb_download.mp4'))
+    except Exception as e:
+        print(e)
+        await ctx.reply('lệnh bạn đang sử dụng đã xảy ra lỗi, vui lòng thử lại sau')
+@bot.command()
+async def severs(ctx):
+  await ctx.send(bot.guilds)
+@bot.command()
+async def channel(ctx):
+  for server in bot.guilds:
+    await ctx.send(server.text_channels)
+@bot.command(pass_context=True)
+async def sendnoti2(ctx, *, msg):
+	for server in bot.guilds:
+		for channel in server.text_channels:
+			try:
+				await channel.send(msg)
+			except Exception as e:
+				print(e)
+				continue
+			else:
+				break
+@bot.command()
+async def baicao(ctx, arg = None):
+    try:
+        def atoi(text):
+            return int(text) if text.isdigit() else text
+
+        def natural_keys(text):
+            '''
+            alist.sort(key=natural_keys) sorts in human order
+            http://nedbatchelder.com/blog/200712/human_sorting.html
+            (See Toothy's implementation in the comments)
+            '''
+            return [ atoi(c) for c in re.split(r'(\d+)', text) ]
+        def read():
+            with open(r"C:\codde\discord_bot\test.json", 'r') as f:
+                users = json.load(f)
+                return users
+        def save(data):
+            with open(r"C:\codde\discord_bot\test.json", 'w') as f:
+                json.dump(data, f)
+        users = read()
+        list_player = []
+        list_player_name = []
+        list_player_result = []
+        message = "-----Kết quả-----\n"
+        prefix = users[str(ctx.message.guild.id)]['prefix']
+        if arg == None:
+            await ctx.send(f'game bài cào nhiều người chơi\n{prefix}baicao [create/start/join]')
+        elif 'baicao_create' not in read()[str(ctx.message.guild.id)] and arg == 'create':
+            list_player.append(str(ctx.message.author.id))
+            list_player_name.append(str(ctx.message.author))
+            users[str(ctx.message.guild.id)]['baicao'] = {}
+            users[str(ctx.message.guild.id)]['baicao']['baicao_create'] = True
+            users[str(ctx.message.guild.id)]['baicao']['player'].append(str(ctx.message.author.id))
+            users[str(ctx.message.guild.id)]['baicao']['player_name'].append(str(ctx.message.author))
+            save(users)
+            await ctx.send(f'Đã tạo bàn bài cào thành công\nHãy nhập {prefix}baicao join để tham gia bàn chơi (người tạo không cần nhập)')
+        elif 'baicao_create' in read()[str(ctx.message.guild.id)] and arg == 'create':
+            await ctx.send('bàn đã được tạo, không thể tạo thêm')
+        elif arg == 'join' and str(ctx.message.author.id) not in users[str(ctx.message.guild.id)]['baicao']['player'] and len(users[str(ctx.message.guild.id)]['baicao']['player']) <= 4:
+            list_player.append(str(ctx.message.author.id))
+            list_player_name.append(str(ctx.message.author))
+            users[str(ctx.message.guild.id)]['baicao']['player'] = list_player
+            users[str(ctx.message.guild.id)]['baicao']['player_name'] = list_player_name
+            save(users)
+        elif arg == 'join' and str(ctx.message.author.id) in users[str(ctx.message.guild.id)]['baicao']['player']:
+            await ctx.send('bạn đã tham gia bàn chơi, không thể tham gia lại')
+        elif arg == 'join' and 'baicao_create' not in read()[str(ctx.message.guild.id)]['baicao']:
+            await ctx.send('chưa tạo bàn để có thể chơi')
+        elif arg == 'start' and 'baicao_create' in read()[str(ctx.message.guild.id)]['baicao'] and len(list_player) >= 2 and len(list_player) <= 4:        
+            for i in range(len(list_player)):
+                card1 = random.randint(1, 9)
+                card2 = random.randint(1, 9)
+                card3 = random.randint(1, 9)
+                result = card1 + card2 + card3
+                if result >= 10:
+                    result -= 10
+                elif result >= 20:
+                    result -= 20
+                list_player_result.append(f"{list_player_name[i - 1]}: {result}")
+                user = await bot.fetch_user(str(list_player[i - 1]))
+                await user.send(f"bai cua ban: {card1} | {card2} | {card3}\ntong bai: {result}")
+                list_player_result.sort(key = natural_keys)
+            for i in list_player_result:
+                message = message + f"{list_player_result[i]}\n"
+                await ctx.send(message)
+    except Exception as e:
+        print(e)
 #Functions
 async def open_account(user):
     users = await get_bank_data()
