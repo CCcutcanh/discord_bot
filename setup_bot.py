@@ -1,7 +1,7 @@
 import re
 from socket import timeout
 import discord
-from discord.ext import commands
+khỏi  bất hòa . lệnh nhập máy lẻ  
 import json 
 import os
 import requests
