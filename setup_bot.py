@@ -1263,5 +1263,5 @@ async def update(user, change, mode):
 def save_member_data(data):
     with open("data.json", 'w') as f:
         json.dump(data, f)
-bot.run('token')
+bot.run('MTAwMTM5ODkzMDcxNTcwNTM5NA.GgKKEu.efSNVZ5Y9QPjBmTfm9IYqoLfmUnIr3OTTSc-ZY')
 #credit: Duc Anh
