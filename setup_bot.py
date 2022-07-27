@@ -1,3 +1,4 @@
+from asyncio import exceptions
 import re
 from socket import timeout
 import discord
@@ -17,12 +18,12 @@ import urllib.request
 from discord.utils import find
 from bs4 import BeautifulSoup
 def command_prefix(bot, message):
-    with open(r"C:\codde\discord_bot\data.json", 'r') as f:
+    with open(r"data.json", 'r') as f:
         users = json.load(f)
     prefix = users[str(message.guild.id)]['prefix']
     return commands.when_mentioned_or(*prefix)(bot, message)
 def get_prefix():
-    with open(r"C:\codde\discord_bot\data.json", 'r') as f:
+    with open(r"data.json", 'r') as f:
         prefix = json.load(f)
     return prefix
 
@@ -581,17 +582,16 @@ async def vuatiengviet(ctx):
             def check(m):
                 return m.author.id == ctx.author.id and m.channel == ctx.channel and m.reference is not None and m.reference.message_id == send.id
             try:
-                async with timeout(45):
-                    while True:
-                        message = await bot.wait_for('message', check=check)
-                        if message:
-                            if message.content.lower() == random_word_vuatiengviet:
-                                await ctx.send(f'bạn đã trả lời đúng, đáp án là "{random_word_vuatiengviet}"')
-                            else:
-                                await ctx.send(f'sai rồi đáp án là "{random_word_vuatiengviet}"')
+                message = await bot.wait_for('message', timeout=45, check=check)
+                if message:
+                    if message.content.lower() == random_word_vuatiengviet:
+                        await ctx.send(f'bạn đã trả lời đúng, đáp án là "{random_word_vuatiengviet}"')
+                    else:
+                        await ctx.send(f'sai rồi đáp án là "{random_word_vuatiengviet}"')
             except asyncio.TimeoutError:
                 await ctx.send('Hết giờ!')
-    except:
+    except Exception as e:
+        print(e)
         await ctx.send('hiện tại lệnh bạn đang sử dụng đã gặp lỗi, hãy thử lại sau. Xin lỗi vì sự cố này')
 @bot.command()
 async def mark(ctx):
@@ -927,7 +927,7 @@ async def slot(ctx, arg = None):
         await ctx.send('bạn không có đủ số tiền để chơi')
     else:
         try:
-            random_icon = ['🥑', '🍐', '🥭', '🍎']
+            random_icon = ['🥑', '🍐', '🥭', '🍎', '🥝', '🍇']
             result = []
             for i in range(3):
                 random_result = random.choice(random_icon)
@@ -1132,17 +1132,17 @@ async def channel(ctx):
     await ctx.send(server.text_channels)
 @bot.command(pass_context=True)
 async def sendnoti2(ctx, *, msg):
-	for server in bot.guilds:
-		for channel in server.text_channels:
-			try:
-				await channel.send(msg)
-			except Exception as e:
-				print(e)
-				continue
-			else:
-				break
+    for server in bot.guilds:
+        for channel in server.text_channels:
+            try:
+                await channel.send(msg)
+            except Exception as e:
+                print(e)
+                continue
+            else:
+                break
 @bot.command()
-async def baicao(ctx, arg = None):
+async def baicao(ctx, arg = None, arg2 = None):
     try:
         def atoi(text):
             return int(text) if text.isdigit() else text
@@ -1153,59 +1153,147 @@ async def baicao(ctx, arg = None):
             http://nedbatchelder.com/blog/200712/human_sorting.html
             (See Toothy's implementation in the comments)
             '''
-            return [ atoi(c) for c in re.split(r'(\d+)', text) ]
+            return [ atoi(c) for c in re.split(r'(\d)', text) ]
         def read():
-            with open(r"C:\codde\discord_bot\test.json", 'r') as f:
+            with open(r"data.json", 'r') as f:
                 users = json.load(f)
                 return users
         def save(data):
-            with open(r"C:\codde\discord_bot\test.json", 'w') as f:
+            with open(r"data.json", 'w') as f:
                 json.dump(data, f)
+        await open_account(ctx.message.author.id)
+        money_data = await get_bank_data()
         users = read()
-        list_player = []
-        list_player_name = []
+        list_player_result_id = []
         list_player_result = []
         message = "-----Kết quả-----\n"
         prefix = users[str(ctx.message.guild.id)]['prefix']
         if arg == None:
-            await ctx.send(f'game bài cào nhiều người chơi\n{prefix}baicao [create/start/join]')
-        elif 'baicao_create' not in read()[str(ctx.message.guild.id)] and arg == 'create':
-            list_player.append(str(ctx.message.author.id))
-            list_player_name.append(str(ctx.message.author))
-            users[str(ctx.message.guild.id)]['baicao'] = {}
-            users[str(ctx.message.guild.id)]['baicao']['baicao_create'] = True
-            users[str(ctx.message.guild.id)]['baicao']['player'].append(str(ctx.message.author.id))
-            users[str(ctx.message.guild.id)]['baicao']['player_name'].append(str(ctx.message.author))
-            save(users)
-            await ctx.send(f'Đã tạo bàn bài cào thành công\nHãy nhập {prefix}baicao join để tham gia bàn chơi (người tạo không cần nhập)')
-        elif 'baicao_create' in read()[str(ctx.message.guild.id)] and arg == 'create':
-            await ctx.send('bàn đã được tạo, không thể tạo thêm')
-        elif arg == 'join' and str(ctx.message.author.id) not in users[str(ctx.message.guild.id)]['baicao']['player'] and len(users[str(ctx.message.guild.id)]['baicao']['player']) <= 4:
-            list_player.append(str(ctx.message.author.id))
-            list_player_name.append(str(ctx.message.author))
-            users[str(ctx.message.guild.id)]['baicao']['player'] = list_player
-            users[str(ctx.message.guild.id)]['baicao']['player_name'] = list_player_name
-            save(users)
-        elif arg == 'join' and str(ctx.message.author.id) in users[str(ctx.message.guild.id)]['baicao']['player']:
-            await ctx.send('bạn đã tham gia bàn chơi, không thể tham gia lại')
-        elif arg == 'join' and 'baicao_create' not in read()[str(ctx.message.guild.id)]['baicao']:
-            await ctx.send('chưa tạo bàn để có thể chơi')
-        elif arg == 'start' and 'baicao_create' in read()[str(ctx.message.guild.id)]['baicao'] and len(list_player) >= 2 and len(list_player) <= 4:        
-            for i in range(len(list_player)):
-                card1 = random.randint(1, 9)
-                card2 = random.randint(1, 9)
-                card3 = random.randint(1, 9)
-                result = card1 + card2 + card3
-                if result >= 10:
-                    result -= 10
-                elif result >= 20:
-                    result -= 20
-                list_player_result.append(f"{list_player_name[i - 1]}: {result}")
-                user = await bot.fetch_user(str(list_player[i - 1]))
-                await user.send(f"bai cua ban: {card1} | {card2} | {card3}\ntong bai: {result}")
-                list_player_result.sort(key = natural_keys)
-            for i in list_player_result:
-                message = message + f"{list_player_result[i]}\n"
+            await ctx.send(f'game bài cào nhiều người chơi\n{prefix}baicao [create/start/join/leave]')
+        elif arg == 'create':
+            if arg2 == None or int(arg2) < 50:
+                await ctx.send(f'bạn chưa nhập số tiền muốn cược cho bàn chơi hoặc số tiền bạn muốn cược nhỏ hơn 50$')
+            elif int(arg2) > money_data[str(ctx.message.author.id)]['Wallet']:
+                await ctx.send(f'bạn không đủ số tiền để chơi')
+            elif 'baicao' in users[str(ctx.message.guild.id)]:
+                await ctx.send(f'đã có một bàn bài cào được tạo trước đó, không thể tạo thêm')
+            else:               
+                users[str(ctx.message.guild.id)]['baicao'] = {}
+                users[str(ctx.message.guild.id)]['baicao']['baicao_create'] = True
+                users[str(ctx.message.guild.id)]['baicao']['player'] = [str(ctx.message.author.id)]
+                users[str(ctx.message.guild.id)]['baicao']['player_name'] = [str(ctx.message.author)]
+                users[str(ctx.message.guild.id)]['baicao']['author'] = str(ctx.message.author.id)
+                users[str(ctx.message.guild.id)]['baicao'][str(ctx.message.author)] = {}
+                users[str(ctx.message.guild.id)]['baicao'][str(ctx.message.author)]['change'] = 2
+                users[str(ctx.message.guild.id)]['baicao'][str(ctx.message.author)]['result'] = None
+                users[str(ctx.message.guild.id)]['baicao']['bet'] = int(arg2)
+                save(users)
+                await update(ctx.message.author.id, int(arg2), 'keobuabao_lose')
+                await ctx.send(f'Đã tạo bàn bài cào thành công\nHãy nhập {prefix}baicao join để tham gia bàn chơi (người tạo không cần nhập)')
+        elif arg == 'join':
+            if 'baicao' not in users[str(ctx.message.guild.id)]:
+                await ctx.send('chưa tạo bàn bài cào để tham gia bàn chơi')
+            elif len(users[str(ctx.message.guild.id)]['baicao']['player']) == 4:
+                await ctx.send('số người chơi tối đa là 4 người')
+            elif str(ctx.message.author.id) in users[str(ctx.message.guild.id)]['baicao']['player'] or str(ctx.message.author.id) in users[str(ctx.message.guild.id)]['baicao']['player_name']:
+                await ctx.send('bạn đã tham gia bàn choi, không thể tham gia lại')
+            elif users[str(ctx.message.guild.id)]['baicao']['bet'] > money_data[str(ctx.message.author.id)]['Wallet']:
+                await ctx.send(f'bạn không đủ số tiền để chơi')
+            else:
+                users[str(ctx.message.guild.id)]['baicao']['player'].append(str(ctx.message.author.id))
+                users[str(ctx.message.guild.id)]['baicao']['player_name'].append(str(ctx.message.author))
+                users[str(ctx.message.guild.id)]['baicao'][str(ctx.message.author)] = {}
+                users[str(ctx.message.guild.id)]['baicao'][str(ctx.message.author)]['change'] = 2
+                users[str(ctx.message.guild.id)]['baicao'][str(ctx.message.author)]['result'] = None
+                save(users)
+                await update(ctx.message.author.id, users[str(ctx.message.guild.id)]['baicao']['bet'], 'keobuabao_lose')
+                await ctx.send("đã tham gia bàn chơi")
+        elif arg == 'leave':
+                if str(ctx.message.author.id) != users[str(ctx.message.guild.id)]['baicao']['author']:
+                   users[str(ctx.message.guild.id)]['baicao']['player'].remove(str(ctx.message.author.id))
+                   users[str(ctx.message.guild.id)]['baicao']['player_name'].remove(str(ctx.message.author))
+                   save(users)
+                   await ctx.send(f'{ctx.message.author.name} đã rời bàn chơi')
+                else:
+                    del users[str(ctx.message.guild.id)]['baicao']
+                    save(users)
+                    await ctx.send('chủ bàn đã hủy bàn chơi, hãy tạo một bàn chơi khác để tiếp tục')
+        elif arg == 'start': 
+            if 'baicao' not in users[str(ctx.message.guild.id)]: 
+                await ctx.send('chưa tạo bàn bài cào để bắt đầu')
+            elif len(users[str(ctx.message.guild.id)]['baicao']['player']) < 2: 
+                await ctx.send('cần ít nhất 2 người trong bàn chơi để bắt đầu')
+            else:   
+                for i in range(len(users[str(ctx.message.guild.id)]['baicao']['player'])):
+                    card1 = random.randint(1, 9)
+                    card2 = random.randint(1, 9)
+                    card3 = random.randint(1, 9)
+                    result = card1 + card2 + card3
+                    if result >= 10:
+                        result -= 10
+                    if result >= 10:
+                        result -= 10
+                    user = await bot.fetch_user(str(users[str(ctx.message.guild.id)]['baicao']['player'][i - 1]))
+                    list_player_result.append(f"{result} {user.name}")
+                    list_player_result_id.append(f"{result} {user.id}")
+                    await user.send(f"bài của bạn: {card1} | {card2} | {card3}\ntổng bài: {result}")
+                    list_player_result.sort(key = natural_keys, reverse=True)
+                    list_player_result_id.sort(key = natural_keys, reverse=True)
+                    print(list_player_result)
+                    if int(len(list_player_result)) == 2:
+                        result = list_player_result[0].split(" ", 1)
+                        print(result)
+                        result2 = result[1] + ": " + result[0]
+                        list_player_result[0] = result2
+                        result = list_player_result[1].split(" ", 1)
+                        print(result)
+                        result2 = result[1] + ": " + result[0]
+                        list_player_result[1] = result2
+                    elif int(len(list_player_result)) == 3:
+                        result = list_player_result[0].split(" ", 1)
+                        print(result)
+                        result2 = result[1] + ": " + result[0]
+                        list_player_result[0] = result2
+                        result = list_player_result[1].split(" ", 1)
+                        print(result)
+                        result2 = result[1] + ": " + result[0]
+                        list_player_result[1] = result2
+                        result = list_player_result[2].split(" ", 1)
+                        print(result)
+                        result2 = result[1] + ": " + result[0]
+                        list_player_result[2] = result2
+                        print(list_player_result)
+                    elif int(len(list_player_result)) == 4:
+                        result = list_player_result[0].split(" ", 1)
+                        print(result)
+                        result2 = result[1] + ": " + result[0]
+                        list_player_result[0] = result2
+                        result = list_player_result[1].split(" ", 1)
+                        print(result)
+                        result2 = result[1] + ": " + result[0]
+                        list_player_result[1] = result2
+                        result = list_player_result[2].split(" ", 1)
+                        print(result)
+                        result2 = result[1] + ": " + result[0]
+                        list_player_result[2] = result2
+                        result = list_player_result[3].split(" ", 1)
+                        print(result)
+                        result2 = result[1] + ": " + result[0]
+                        list_player_result[3] = result2
+                rank = 1
+                player_win_id = list_player_result_id[0].split(" ", 1)[1]
+                player_win_info = await bot.fetch_user(str(player_win_id))
+                player_win_name = player_win_info.name
+                win_bet = int(users[str(ctx.message.guild.id)]['baicao']['bet']) * int(len(users[str(ctx.message.guild.id)]['baicao']['player']))
+                users[str(ctx.message.guild.id)]['baicao']['baicao_start'] = True
+                save(users)
+                await ctx.send(f'đã chia bài thành công, bot sẽ thông báo kết quả sau 45 giây nữa')
+                await asyncio.sleep(45)
+                for k in list_player_result:
+                    message = message + f"{rank}. {k}\n"
+                    rank += 1
+                message = message + f"\n{player_win_name} là người chiến thắng và gom về {win_bet}$ tiền cược"
+                await update(player_win_id, int(win_bet), 'keobuabao_win')
                 await ctx.send(message)
     except Exception as e:
         print(e)
