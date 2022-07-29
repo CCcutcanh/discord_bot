@@ -1262,6 +1262,6 @@ async def update(user, change, mode):
         print('error')
 def save_member_data(data):
     with open("data.json", 'w') as f:
-        json.dump(data, f)
-bot.run('MTAwMTM5ODkzMDcxNTcwNTM5NA.GgKKEu.efSNVZ5Y9QPjBmTfm9IYqoLfmUnIr3OTTSc-ZY')
-#credit: Duc Anh
+        json . kết xuất ( dữ liệu , f )
+bot . run ( 'MTAwMTc2NDAzMDU1OTU1MTU1OA.GKI4MI.aXEPEBDj64PwO7jcsZH-2mgRJJ0JFviFCT3fGs' )
+
