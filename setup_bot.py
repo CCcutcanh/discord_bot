@@ -1146,13 +1146,7 @@ async def baicao(ctx, arg = None, arg2 = None):
     try:
         def atoi(text):
             return int(text) if text.isdigit() else text
-
         def natural_keys(text):
-            '''
-            alist.sort(key=natural_keys) sorts in human order
-            http://nedbatchelder.com/blog/200712/human_sorting.html
-            (See Toothy's implementation in the comments)
-            '''
             return [ atoi(c) for c in re.split(r'(\d)', text) ]
         def read():
             with open(r"data.json", 'r') as f:
@@ -1188,7 +1182,6 @@ async def baicao(ctx, arg = None, arg2 = None):
                 users[str(ctx.message.guild.id)]['baicao'][str(ctx.message.author)]['result'] = None
                 users[str(ctx.message.guild.id)]['baicao']['bet'] = int(arg2)
                 save(users)
-                await update(ctx.message.author.id, int(arg2), 'keobuabao_lose')
                 await ctx.send(f'Đã tạo bàn bài cào thành công\nHãy nhập {prefix}baicao join để tham gia bàn chơi (người tạo không cần nhập)')
         elif arg == 'join':
             if 'baicao' not in users[str(ctx.message.guild.id)]:
@@ -1206,7 +1199,6 @@ async def baicao(ctx, arg = None, arg2 = None):
                 users[str(ctx.message.guild.id)]['baicao'][str(ctx.message.author)]['change'] = 2
                 users[str(ctx.message.guild.id)]['baicao'][str(ctx.message.author)]['result'] = None
                 save(users)
-                await update(ctx.message.author.id, users[str(ctx.message.guild.id)]['baicao']['bet'], 'keobuabao_lose')
                 await ctx.send("đã tham gia bàn chơi")
         elif arg == 'leave':
                 if str(ctx.message.author.id) != users[str(ctx.message.guild.id)]['baicao']['author']:
@@ -1234,6 +1226,7 @@ async def baicao(ctx, arg = None, arg2 = None):
                     if result >= 10:
                         result -= 10
                     user = await bot.fetch_user(str(users[str(ctx.message.guild.id)]['baicao']['player'][i - 1]))
+                    await update(str(user.id), users[str(ctx.message.guild.id)]['baicao']['bet'], 'keobuabao_lose')
                     list_player_result.append(f"{result} {user.name}")
                     list_player_result_id.append(f"{result} {user.id}")
                     await user.send(f"bài của bạn: {card1} | {card2} | {card3}\ntổng bài: {result}")
