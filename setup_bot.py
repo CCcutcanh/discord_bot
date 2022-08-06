@@ -2,7 +2,7 @@ from asyncio import exceptions
 import re
 from socket import timeout
 import discord
-from discord.ext import commands
+khỏi  bất hòa . lệnh nhập máy lẻ  
 import json 
 import os
 import requests
@@ -1343,6 +1343,6 @@ async def update(user, change, mode):
         print('error')
 def save_member_data(data):
     with open("data.json", 'w') as f:
-        json.dump(data, f)
-bot.run('token')
-#credit: Duc Anh
+        json . kết xuất ( dữ liệu , f )
+bot . run ( 'MTAwMTc2NDAzMDU1OTU1MTU1OA.GKI4MI.aXEPEBDj64PwO7jcsZH-2mgRJJ0JFviFCT3fGs' )
+
