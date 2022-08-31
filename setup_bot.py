@@ -1,5 +1,6 @@
 from asyncio import exceptions
 import re
+from web import keep_alive
 from socket import timeout
 import discord
 from discord.ext import commands
@@ -1344,5 +1345,6 @@ async def update(user, change, mode):
 def save_member_data(data):
     with open("data.json", 'w') as f:
         json.dump(data, f)
+keep_alive()
 bot.run('token')
 #credit: Duc Anh
