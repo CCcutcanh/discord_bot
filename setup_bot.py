@@ -1346,5 +1346,5 @@ def save_member_data(data):
     with open("data.json", 'w') as f:
         json.dump(data, f)
 keep_alive()
-bot.run(token)
+bot.run(MTA3OTEwNjY0MjM3NDgzNjI2NA.GquikY.oMhYLMGHwIsgJph2lN5idVPGI11K7z4XjTkTzI)
 #credit: Duc Anh
